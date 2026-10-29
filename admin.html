@@ -1,0 +1,552 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Painel Administrativo | Casa Amaral</title>
+<meta name="description" content="Painel administrativo Casa Amaral">
+<style>
+:root{
+  color-scheme:light;
+  --bg:#f6f8fa;
+  --surface:#ffffff;
+  --surface2:#f1f4f6;
+  --surface3:#e7edf1;
+  --text:#111820;
+  --heading:#081018;
+  --muted:#66727d;
+  --subtle:#8c97a1;
+  --line:#dde5ea;
+  --accent:#f4b900;
+  --accent2:#ffd75a;
+  --primary:#0e161e;
+  --primaryfg:#fff;
+  --success:#19a85a;
+  --danger:#d94c4c;
+  --warning:#d99100;
+  --shadow:0 18px 48px rgba(20,31,41,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0;
+  background:linear-gradient(180deg,#fbfcfd 0%,var(--bg) 100%);
+  color:var(--text);
+  font-family:"Bahnschrift","Segoe UI Variable","Aptos",system-ui,-apple-system,sans-serif;
+}
+button,input,textarea,select{font:inherit}
+button{cursor:pointer}
+a{text-decoration:none;color:inherit}
+.shell{width:min(1460px,calc(100% - 32px));margin:auto}
+
+header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(255,255,255,.92);
+  backdrop-filter:blur(18px);
+  border-bottom:1px solid var(--line);
+}
+.topbar{
+  height:74px;display:flex;align-items:center;gap:18px
+}
+.brand{
+  display:flex;align-items:center;gap:12px;
+  font-weight:850;letter-spacing:-.04em
+}
+.brand-mark{
+  width:42px;height:42px;border-radius:11px;background:var(--primary);position:relative
+}
+.brand-mark:before{
+  content:"";position:absolute;left:10px;top:12px;width:22px;height:17px;background:var(--accent);
+  clip-path:polygon(50% 0,100% 36%,100% 100%,0 100%,0 36%)
+}
+.brand-mark:after{
+  content:"";position:absolute;left:18px;top:21px;width:6px;height:9px;background:#fff
+}
+.admin-badge{
+  margin-left:4px;padding:6px 9px;border-radius:999px;background:var(--surface2);
+  color:var(--muted);font-size:.72rem;font-weight:700;border:1px solid var(--line)
+}
+.top-actions{margin-left:auto;display:flex;gap:9px}
+.btn{
+  min-height:42px;padding:0 15px;border-radius:10px;border:1px solid var(--line);
+  background:var(--surface);color:var(--text);font-weight:700
+}
+.btn:hover{border-color:#cbd5dc}
+.btn.primary{background:var(--primary);color:var(--primaryfg);border-color:transparent}
+.btn.primary:hover{background:#1a2732}
+.btn.accent{background:var(--accent);color:#111820;border-color:transparent}
+.btn.danger{color:var(--danger)}
+.btn.small{min-height:34px;padding:0 11px;font-size:.78rem}
+
+main{padding:34px 0 70px}
+.page-head{
+  display:flex;justify-content:space-between;align-items:end;gap:24px;margin-bottom:28px
+}
+.eyebrow{
+  display:flex;align-items:center;gap:9px;text-transform:uppercase;letter-spacing:.15em;
+  font-size:.72rem;font-weight:700;color:var(--subtle)
+}
+.eyebrow:before{content:"";width:28px;height:2px;background:var(--accent)}
+h1{
+  margin:10px 0 8px;font-size:clamp(2.5rem,4.7vw,4.7rem);line-height:.92;
+  letter-spacing:-.06em;color:var(--heading);font-weight:650
+}
+.page-head p{margin:0;color:var(--muted);max-width:680px;line-height:1.6}
+.status-box{text-align:right}
+.status-box strong{display:block;color:var(--heading);font-size:1.05rem}
+.status-box span{color:var(--muted);font-size:.8rem}
+
+.grid{
+  display:grid;grid-template-columns:430px 1fr;gap:22px;align-items:start
+}
+.panel{
+  background:var(--surface);border:1px solid var(--line);border-radius:18px;
+  box-shadow:0 12px 36px rgba(20,31,41,.05)
+}
+.panel-head{
+  padding:18px 20px;border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;gap:12px
+}
+.panel-head h2{margin:0;font-size:1rem;letter-spacing:-.02em}
+.panel-head small{color:var(--subtle)}
+.panel-body{padding:20px}
+
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+label{font-size:.76rem;color:var(--muted);font-weight:700}
+input,textarea,select{
+  width:100%;border:1px solid var(--line);background:var(--surface2);color:var(--text);
+  border-radius:10px;outline:none;padding:0 12px;transition:.2s
+}
+input,select{height:46px}
+textarea{min-height:104px;padding-top:12px;resize:vertical}
+input:focus,textarea:focus,select:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px rgba(244,185,0,.13);background:#fff
+}
+.switch-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)
+}
+.switch-copy strong{display:block;font-size:.85rem}
+.switch-copy span{display:block;color:var(--muted);font-size:.72rem;margin-top:2px}
+.switch{
+  position:relative;width:48px;height:28px;border-radius:999px;background:#c9d1d7;
+  border:0;padding:0;transition:.2s
+}
+.switch:after{
+  content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:#fff;
+  top:3px;left:3px;box-shadow:0 2px 6px rgba(0,0,0,.16);transition:.2s
+}
+.switch.on{background:var(--success)}
+.switch.on:after{transform:translateX(20px)}
+.form-actions{display:flex;gap:9px;margin-top:18px}
+.form-actions .btn{flex:1}
+
+.preview{
+  margin-top:18px;border-top:1px solid var(--line);padding-top:18px
+}
+.preview-card{
+  border:1px solid var(--line);border-radius:14px;padding:12px;background:#fff
+}
+.preview-media{
+  height:170px;border-radius:11px;background:linear-gradient(145deg,var(--surface2),var(--surface3));
+  display:grid;place-items:center;overflow:hidden
+}
+.preview-media img{width:100%;height:100%;object-fit:contain;padding:12px}
+.preview-media span{font-size:3.4rem}
+.preview-info{padding:10px 4px 2px}
+.preview-info small{text-transform:uppercase;letter-spacing:.08em;color:var(--subtle);font-weight:700}
+.preview-info h3{margin:5px 0 8px;font-size:1rem}
+.preview-price{font-size:1.1rem;font-weight:800}
+
+.tools{
+  padding:14px 16px;border-bottom:1px solid var(--line);
+  display:grid;grid-template-columns:1fr auto auto;gap:9px
+}
+.search{position:relative}
+.search span{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--subtle)}
+.search input{padding-left:38px}
+.table-wrap{overflow:auto}
+table{width:100%;border-collapse:collapse;min-width:920px}
+th,td{padding:13px 14px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+th{
+  position:sticky;top:0;background:#fbfcfd;color:var(--subtle);font-size:.72rem;
+  text-transform:uppercase;letter-spacing:.08em;font-weight:700
+}
+td{font-size:.84rem}
+.prod{
+  display:flex;align-items:center;gap:10px;min-width:250px
+}
+.thumb{
+  width:48px;height:48px;border-radius:10px;background:var(--surface2);
+  display:grid;place-items:center;overflow:hidden;flex:0 0 48px
+}
+.thumb img{width:100%;height:100%;object-fit:cover}
+.prod strong{display:block;color:var(--heading)}
+.prod small{display:block;color:var(--muted);margin-top:3px}
+.badge{
+  display:inline-flex;align-items:center;gap:5px;padding:6px 8px;border-radius:999px;
+  font-size:.7rem;font-weight:700;border:1px solid var(--line)
+}
+.badge.active{background:#eefaf3;color:#168a4b;border-color:#ccebd9}
+.badge.inactive{background:#fff4f4;color:#bd3d3d;border-color:#f0d1d1}
+.actions{display:flex;gap:6px;white-space:nowrap}
+.empty{
+  padding:60px 20px;text-align:center;color:var(--muted)
+}
+.empty strong{display:block;color:var(--heading);margin-bottom:4px}
+.footnote{
+  margin-top:16px;padding:13px 15px;border:1px dashed var(--line);border-radius:12px;
+  color:var(--muted);font-size:.76rem;line-height:1.55
+}
+.toast{
+  position:fixed;right:20px;bottom:20px;z-index:100;
+  background:var(--primary);color:#fff;padding:12px 14px;border-radius:11px;
+  box-shadow:var(--shadow);opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s
+}
+.toast.show{opacity:1;transform:none}
+@media(max-width:1080px){
+  .grid{grid-template-columns:1fr}
+}
+@media(max-width:720px){
+  .shell{width:min(100% - 20px,1460px)}
+  .topbar{height:66px}
+  .admin-badge{display:none}
+  .page-head{display:block}.status-box{text-align:left;margin-top:18px}
+  .form-grid{grid-template-columns:1fr}.field.full{grid-column:auto}
+  .tools{grid-template-columns:1fr 1fr}.search{grid-column:1/-1}
+  .top-actions .btn:first-child{display:none}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="shell topbar">
+    <a href="index.html" class="brand">
+      <span class="brand-mark"></span>
+      <span>CASA AMARAL</span>
+      <span class="admin-badge">ADMIN</span>
+    </a>
+    <div class="top-actions">
+      <a class="btn" href="index.html" target="_blank">Ver site</a>
+      <button class="btn accent" id="newProductBtn">+ Novo produto</button>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="shell">
+    <section class="page-head">
+      <div>
+        <div class="eyebrow">Painel administrativo</div>
+        <h1>Produtos</h1>
+        <p>Cadastre, edite e organize os produtos da Casa Amaral. Nesta versão de teste os dados ficam salvos neste navegador; depois conectaremos este mesmo painel ao Google Sheets.</p>
+      </div>
+      <div class="status-box">
+        <strong id="productCount">0 produtos</strong>
+        <span>Modo local de desenvolvimento</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <aside class="panel">
+        <div class="panel-head">
+          <div><h2 id="formTitle">Novo produto</h2><small id="formSubtitle">Preencha os dados abaixo</small></div>
+          <button class="btn small" id="clearBtn">Limpar</button>
+        </div>
+        <div class="panel-body">
+          <form id="productForm">
+            <input type="hidden" id="productId">
+            <div class="form-grid">
+              <div class="field full">
+                <label for="title">Título do produto</label>
+                <input id="title" maxlength="120" placeholder="Ex.: Furadeira de impacto 800W" required>
+              </div>
+
+              <div class="field full">
+                <label for="description">Descrição</label>
+                <textarea id="description" maxlength="500" placeholder="Descrição curta e objetiva do produto"></textarea>
+              </div>
+
+              <div class="field">
+                <label for="price">Preço</label>
+                <input id="price" inputmode="decimal" placeholder="299,90" required>
+              </div>
+
+              <div class="field">
+                <label for="oldPrice">Preço anterior</label>
+                <input id="oldPrice" inputmode="decimal" placeholder="349,90">
+              </div>
+
+              <div class="field">
+                <label for="category">Categoria</label>
+                <input id="category" list="categoryList" placeholder="Ferramentas" required>
+                <datalist id="categoryList">
+                  <option value="Materiais básicos">
+                  <option value="Ferramentas">
+                  <option value="Elétrica">
+                  <option value="Hidráulica">
+                  <option value="Tintas">
+                  <option value="Ferragens">
+                  <option value="Banheiro">
+                  <option value="Acabamento">
+                  <option value="Impermeabilização">
+                </datalist>
+              </div>
+
+              <div class="field">
+                <label for="stock">Estoque</label>
+                <input id="stock" type="number" min="0" value="0">
+              </div>
+
+              <div class="field full">
+                <label for="image">URL da foto</label>
+                <input id="image" type="url" placeholder="https://...">
+              </div>
+
+              <div class="field full">
+                <label for="tag">Etiqueta</label>
+                <input id="tag" maxlength="40" placeholder="Ex.: Oferta, Mais vendido, Novidade">
+              </div>
+
+              <div class="field full">
+                <div class="switch-row">
+                  <div class="switch-copy">
+                    <strong>Produto ativo</strong>
+                    <span>Quando desativado, não deverá aparecer no site público.</span>
+                  </div>
+                  <button type="button" class="switch on" id="activeSwitch" aria-label="Produto ativo"></button>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button type="submit" class="btn primary" id="saveBtn">Salvar produto</button>
+              <button type="button" class="btn danger" id="deleteBtn" style="display:none">Excluir</button>
+            </div>
+          </form>
+
+          <div class="preview">
+            <label>Prévia</label>
+            <div class="preview-card">
+              <div class="preview-media" id="previewMedia"><span>📦</span></div>
+              <div class="preview-info">
+                <small id="previewCategory">Categoria</small>
+                <h3 id="previewTitle">Nome do produto</h3>
+                <div class="preview-price" id="previewPrice">R$ 0,00</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="footnote">
+            Próxima etapa: conectar este painel ao Google Sheets. O cadastro de um produto criará uma nova linha; editar localizará o produto pelo ID e atualizará a mesma linha.
+          </div>
+        </div>
+      </aside>
+
+      <section class="panel">
+        <div class="panel-head">
+          <div><h2>Catálogo cadastrado</h2><small>Gerencie os produtos já registrados</small></div>
+        </div>
+        <div class="tools">
+          <div class="search"><span>⌕</span><input id="search" placeholder="Buscar produto, categoria ou ID..."></div>
+          <select id="statusFilter">
+            <option value="all">Todos</option>
+            <option value="active">Ativos</option>
+            <option value="inactive">Inativos</option>
+          </select>
+          <select id="sort">
+            <option value="newest">Mais recentes</option>
+            <option value="title">Título A–Z</option>
+            <option value="priceAsc">Menor preço</option>
+            <option value="priceDesc">Maior preço</option>
+          </select>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Produto</th>
+                <th>ID</th>
+                <th>Preço</th>
+                <th>Estoque</th>
+                <th>Status</th>
+                <th>Ações</th>
+              </tr>
+            </thead>
+            <tbody id="productRows"></tbody>
+          </table>
+          <div class="empty" id="emptyState" style="display:none">
+            <strong>Nenhum produto encontrado</strong>
+            Cadastre um novo produto ou altere os filtros.
+          </div>
+        </div>
+      </section>
+    </section>
+  </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const STORAGE_KEY='casa-amaral-admin-products';
+let products=loadProducts();
+let editingId=null;
+let active=true;
+
+const $=id=>document.getElementById(id);
+const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
+
+function parseMoney(v){
+  const s=String(v||'').trim().replace(/R\$/gi,'').replace(/\s/g,'');
+  if(!s)return 0;
+  if(s.includes(',')&&s.includes('.'))return Number(s.replace(/\./g,'').replace(',','.'))||0;
+  if(s.includes(','))return Number(s.replace(',','.'))||0;
+  return Number(s)||0;
+}
+function loadProducts(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]');
+    if(Array.isArray(saved)&&saved.length)return saved;
+  }catch(e){}
+  return [
+    {id:'1',title:'Cimento CP II 50 kg',description:'Cimento de uso geral para concretos e argamassas.',price:39.90,oldPrice:44.90,category:'Materiais básicos',stock:20,image:'',tag:'Mais vendido',active:true,createdAt:Date.now()-3000},
+    {id:'2',title:'Furadeira de impacto 800 W',description:'Furadeira para alvenaria, madeira e metal.',price:269.90,oldPrice:319.90,category:'Ferramentas',stock:5,image:'',tag:'Destaque',active:true,createdAt:Date.now()-2000},
+    {id:'3',title:'Torneira de mesa cromada',description:'Torneira cromada para banheiro ou cozinha.',price:79.90,oldPrice:89.90,category:'Hidráulica',stock:8,image:'',tag:'Oferta',active:true,createdAt:Date.now()-1000}
+  ];
+}
+function persist(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify(products));
+}
+function nextId(){
+  const numeric=products.map(p=>Number(p.id)).filter(Number.isFinite);
+  return String((numeric.length?Math.max(...numeric):0)+1);
+}
+function toast(msg){
+  const el=$('toast');el.textContent=msg;el.classList.add('show');
+  setTimeout(()=>el.classList.remove('show'),2200);
+}
+function categoryIcon(c=''){
+  c=c.toLowerCase();
+  if(c.includes('ferrament'))return '🔧';
+  if(c.includes('elétr')||c.includes('eletr'))return '⚡';
+  if(c.includes('hidrául')||c.includes('hidraul'))return '🚰';
+  if(c.includes('tinta'))return '🎨';
+  if(c.includes('banheiro'))return '🚿';
+  if(c.includes('ferragen'))return '🔩';
+  if(c.includes('acabamento'))return '◻️';
+  if(c.includes('material'))return '🧱';
+  return '📦';
+}
+function updatePreview(){
+  $('previewTitle').textContent=$('title').value.trim()||'Nome do produto';
+  $('previewCategory').textContent=$('category').value.trim()||'Categoria';
+  $('previewPrice').textContent=money(parseMoney($('price').value));
+  const img=$('image').value.trim();
+  const media=$('previewMedia');
+  media.innerHTML=img?`<img src="${img}" alt="" onerror="this.parentNode.innerHTML='<span>${categoryIcon($('category').value)}</span>'">`:`<span>${categoryIcon($('category').value)}</span>`;
+}
+function resetForm(){
+  editingId=null;active=true;
+  $('productForm').reset();$('stock').value='0';$('productId').value='';
+  $('activeSwitch').classList.add('on');
+  $('formTitle').textContent='Novo produto';
+  $('formSubtitle').textContent='Preencha os dados abaixo';
+  $('saveBtn').textContent='Salvar produto';
+  $('deleteBtn').style.display='none';
+  updatePreview();
+}
+function editProduct(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  editingId=id;active=p.active;
+  $('productId').value=p.id;$('title').value=p.title;$('description').value=p.description||'';
+  $('price').value=String(p.price).replace('.',',');$('oldPrice').value=p.oldPrice?String(p.oldPrice).replace('.',','):'';
+  $('category').value=p.category;$('stock').value=p.stock??0;$('image').value=p.image||'';$('tag').value=p.tag||'';
+  $('activeSwitch').classList.toggle('on',active);
+  $('formTitle').textContent='Editar produto';
+  $('formSubtitle').textContent='ID '+p.id+' — alterações atualizam este registro';
+  $('saveBtn').textContent='Salvar alterações';
+  $('deleteBtn').style.display='inline-flex';
+  updatePreview();window.scrollTo({top:0,behavior:'smooth'});
+}
+function deleteProduct(id){
+  if(!confirm('Excluir este produto?'))return;
+  products=products.filter(p=>p.id!==id);persist();render();resetForm();toast('Produto excluído');
+}
+function toggleProduct(id){
+  const p=products.find(x=>x.id===id);if(!p)return;
+  p.active=!p.active;persist();render();toast(p.active?'Produto ativado':'Produto desativado');
+}
+function render(){
+  const q=$('search').value.trim().toLowerCase();
+  const status=$('statusFilter').value;
+  const sort=$('sort').value;
+  let data=products.filter(p=>{
+    const hay=(p.id+' '+p.title+' '+p.category).toLowerCase();
+    const matchQ=!q||hay.includes(q);
+    const matchStatus=status==='all'||(status==='active'&&p.active)||(status==='inactive'&&!p.active);
+    return matchQ&&matchStatus;
+  });
+  if(sort==='title')data.sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
+  if(sort==='priceAsc')data.sort((a,b)=>a.price-b.price);
+  if(sort==='priceDesc')data.sort((a,b)=>b.price-a.price);
+  if(sort==='newest')data.sort((a,b)=>(b.createdAt||0)-(a.createdAt||0));
+
+  $('productCount').textContent=products.length+' produto'+(products.length===1?'':'s');
+  const tbody=$('productRows');
+  tbody.innerHTML=data.map(p=>`
+    <tr>
+      <td><div class="prod"><div class="thumb">${p.image?`<img src="${p.image}" alt="">`:`${categoryIcon(p.category)}`}</div><div><strong>${p.title}</strong><small>${p.category}${p.tag?' · '+p.tag:''}</small></div></div></td>
+      <td>#${p.id}</td>
+      <td><strong>${money(p.price)}</strong></td>
+      <td>${p.stock??0}</td>
+      <td><span class="badge ${p.active?'active':'inactive'}">${p.active?'● Ativo':'● Inativo'}</span></td>
+      <td><div class="actions">
+        <button class="btn small" data-edit="${p.id}">Editar</button>
+        <button class="btn small" data-toggle="${p.id}">${p.active?'Desativar':'Ativar'}</button>
+      </div></td>
+    </tr>`).join('');
+  $('emptyState').style.display=data.length?'none':'block';
+
+  tbody.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));
+  tbody.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>toggleProduct(b.dataset.toggle));
+}
+$('productForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const data={
+    id:editingId||nextId(),
+    title:$('title').value.trim(),
+    description:$('description').value.trim(),
+    price:parseMoney($('price').value),
+    oldPrice:parseMoney($('oldPrice').value)||null,
+    category:$('category').value.trim(),
+    stock:Math.max(0,Number($('stock').value)||0),
+    image:$('image').value.trim(),
+    tag:$('tag').value.trim(),
+    active,
+    createdAt:editingId?(products.find(p=>p.id===editingId)?.createdAt||Date.now()):Date.now()
+  };
+  if(editingId){
+    const i=products.findIndex(p=>p.id===editingId);
+    if(i>=0)products[i]=data;
+    toast('Produto atualizado');
+  }else{
+    products.push(data);toast('Produto cadastrado');
+  }
+  persist();render();resetForm();
+});
+$('activeSwitch').onclick=()=>{active=!active;$('activeSwitch').classList.toggle('on',active)};
+$('clearBtn').onclick=resetForm;
+$('newProductBtn').onclick=()=>{resetForm();window.scrollTo({top:0,behavior:'smooth'})};
+$('deleteBtn').onclick=()=>editingId&&deleteProduct(editingId);
+['title','category','price','image'].forEach(id=>$(id).addEventListener('input',updatePreview));
+$('search').addEventListener('input',render);
+$('statusFilter').addEventListener('change',render);
+$('sort').addEventListener('change',render);
+
+resetForm();render();
+</script>
+</body>
+</html>
