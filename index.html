@@ -889,18 +889,18 @@ function checkoutWhatsApp(){
 }
 function openGeneralWhatsApp(){window.open('https://wa.me/551436522025?text='+encodeURIComponent('Olá! Vim pelo site da Casa Amaral e gostaria de atendimento.'),'_blank')}
 
-document.getElementById('brandBtn').onclick=()=>showView('home');
-document.getElementById('mobileHome').onclick=()=>showView('home');
-document.getElementById('heroProducts').onclick=()=>showView('products');
-document.getElementById('heroCategories').onclick=()=>showView('products');
-document.getElementById('backHome').onclick=()=>showView('home');
-document.getElementById('searchBtn').onclick=()=>showView('products',{focusSearch:true});
-document.getElementById('cartBtn').onclick=openCart;
-document.getElementById('closeCart').onclick=closeCart;
-document.getElementById('drawerBackdrop').onclick=closeCart;
-document.getElementById('checkoutBtn').onclick=checkoutWhatsApp;
-document.getElementById('homeWhatsApp').onclick=openGeneralWhatsApp;
-document.getElementById('floatWa').onclick=openGeneralWhatsApp;
+document.getElementById('brandBtn')?.addEventListener('click',()=>showView('home'));
+document.getElementById('mobileHome')?.addEventListener('click',()=>showView('home'));
+document.getElementById('heroProducts')?.addEventListener('click',()=>showView('products'));
+document.getElementById('heroCategories')?.addEventListener('click',()=>showView('products'));
+document.getElementById('backHome')?.addEventListener('click',()=>showView('home'));
+document.getElementById('searchBtn')?.addEventListener('click',()=>showView('products',{focusSearch:true}));
+document.getElementById('cartBtn')?.addEventListener('click',openCart);
+document.getElementById('closeCart')?.addEventListener('click',closeCart);
+document.getElementById('drawerBackdrop')?.addEventListener('click',closeCart);
+document.getElementById('checkoutBtn')?.addEventListener('click',checkoutWhatsApp);
+document.getElementById('homeWhatsApp')?.addEventListener('click',openGeneralWhatsApp);
+document.getElementById('floatWa')?.addEventListener('click',openGeneralWhatsApp);
 document.getElementById('filterToggle').onclick=()=>document.getElementById('sidebar').classList.toggle('open');
 document.getElementById('searchInput').addEventListener('input',e=>{searchTerm=e.target.value.trim();renderProducts()});
 document.getElementById('sortSelect').addEventListener('change',e=>{sortMode=e.target.value;renderProducts()});
