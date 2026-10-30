@@ -26,7 +26,7 @@ linear-gradient(180deg,#fbfcfd,var(--bg))}
 .userchip{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);font-size:.74rem;color:var(--muted)}
 .userchip strong{color:var(--text)}
 [hidden]{display:none!important}
-.variation-section{grid-column:1/-1;border:1px solid var(--line);border-radius:13px;background:#fbfcfd;padding:14px;margin-top:2px}.variation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.variation-head strong{font-size:.86rem}.variation-head span{display:block;color:var(--muted);font-size:.71rem;margin-top:2px}.variation-list{display:grid;gap:10px}.variation-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px}.variation-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.variation-card-head strong{font-size:.82rem}.variation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.variation-grid .wide{grid-column:1/-1}.variation-remove{min-height:32px;padding:0 10px;border:1px solid #f0caca;border-radius:9px;background:#fff;color:var(--danger);font-weight:700}.variation-empty{padding:12px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.76rem;text-align:center}.groupbadge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#fff8dc;color:#7a5a00;font-size:.67rem;font-weight:800;margin-top:4px}
+.variation-section{grid-column:1/-1;border:1px solid var(--line);border-radius:13px;background:#fbfcfd;padding:14px;margin-top:2px}.variation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.variation-head strong{font-size:.86rem}.variation-head span{display:block;color:var(--muted);font-size:.71rem;margin-top:2px}.variation-bulk{margin:10px 0 12px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff}.variation-bulk label{display:block;margin-bottom:6px}.variation-bulk textarea{min-height:125px;background:var(--surface2)}.variation-bulk-help{color:var(--muted);font-size:.7rem;line-height:1.45;margin:6px 0 10px}.variation-bulk-actions{display:flex;gap:8px;flex-wrap:wrap}.variation-list{display:grid;gap:10px}.variation-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px}.variation-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.variation-card-head strong{font-size:.82rem}.variation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.variation-grid .wide{grid-column:1/-1}.variation-remove{min-height:32px;padding:0 10px;border:1px solid #f0caca;border-radius:9px;background:#fff;color:var(--danger);font-weight:700}.variation-empty{padding:12px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.76rem;text-align:center}.groupbadge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#fff8dc;color:#7a5a00;font-size:.67rem;font-weight:800;margin-top:4px}
 @media(max-width:1080px){.grid{grid-template-columns:1fr}.conn{min-width:0}.pagehead{display:block}.conn{margin-top:16px}}@media(max-width:700px){.shell{width:min(100% - 18px,1450px)}.badge{display:none}.right .btn:first-child{display:none}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.tools{grid-template-columns:1fr 1fr}.search{grid-column:1/-1}}
 </style>
 </head>
@@ -58,13 +58,24 @@ linear-gradient(180deg,#fbfcfd,var(--bg))}
 <div class="field"><label>Etiqueta</label><input id="etiqueta" maxlength="40" placeholder="Oferta, Mais vendido..."></div>
 <div class="field full"><label>Foto principal (opcional)</label><input id="foto" type="url" placeholder="https://..."></div>
 
-<div class="field"><label>Preço do produto simples</label><input id="preco" required inputmode="decimal" placeholder="299,90"></div>
+<div class="field"><label>Preço do produto simples</label><input id="preco" inputmode="decimal" placeholder="299,90"></div>
 <div class="field"><label>Preço anterior</label><input id="precoAntigo" inputmode="decimal"></div>
 <div class="field"><label>Estoque do produto simples</label><input id="estoque" type="number" min="0" value="0"></div>
 <div class="field"><div class="switchrow"><div class="switchcopy"><strong>Produto ativo</strong><span>Controla a exibição no site.</span></div><button type="button" class="switch on" id="activeSwitch"></button></div></div>
 
 <div class="variation-section">
-  <div class="variation-head"><div><strong>Variações do produto</strong><span>Opcional. Adicione quantas cores, tamanhos ou modelos quiser.</span></div><button class="btn accent" type="button" id="addVariationBtn">+ Adicionar variação</button></div>
+  <div class="variation-head"><div><strong>Variações do produto</strong><span>Adicione individualmente ou cole uma lista inteira de uma vez.</span></div><button class="btn accent" type="button" id="addVariationBtn">+ Adicionar variação</button></div>
+
+  <div class="variation-bulk">
+    <label for="variationBulk">Adicionar variações em lista</label>
+    <textarea id="variationBulk" placeholder="Azul&#10;Amarelo&#10;Vermelho&#10;Verde&#10;Marrom"></textarea>
+    <div class="variation-bulk-help">Digite ou cole uma variação por linha. Também aceita nomes separados por vírgula ou ponto e vírgula. Variações repetidas serão ignoradas.</div>
+    <div class="variation-bulk-actions">
+      <button class="btn accent" type="button" id="createVariationsBtn">Criar variações da lista</button>
+      <button class="btn" type="button" id="clearVariationBulkBtn">Limpar lista</button>
+    </div>
+  </div>
+
   <div class="variation-list" id="variationList"></div>
 </div>
 </div>
@@ -101,6 +112,48 @@ function icon(c=''){c=c.toLowerCase();if(c.includes('ferrament'))return'🔧';if
 function esc(v=''){return String(v).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
 function uid(){return 'v_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
 function makeVariation(p={}){return{localId:uid(),id:p.id||'',variacao:p.variacao||'',cor:p.cor||'',sku_variacao:p.sku_variacao||'',preco:p.preco??'',preco_antigo:p.preco_antigo??'',estoque:p.estoque??0,foto_url:p.foto_url||''}}
+function skuPart(v=''){
+  return String(v).normalize('NFD').replace(/[\u0300-\u036f]/g,'').toUpperCase().replace(/[^A-Z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,60);
+}
+function buildVariationSku(name){
+  const base=skuPart($('titulo').value.trim())||'PRODUTO';
+  const part=skuPart(name)||'VAR';
+  return (base+'-'+part).slice(0,100);
+}
+function createVariationsFromList(){
+  collectVariationsFromDom();
+  const raw=$('variationBulk').value.trim();
+  if(!raw){toast('Digite pelo menos uma variação na lista.');return}
+  const names=raw.split(/[\n,;]+/).map(v=>v.trim()).filter(Boolean);
+  const existing=new Set(variations.map(v=>String(v.variacao||'').trim().toLocaleLowerCase('pt-BR')));
+  let added=0;
+  const basePrice=parseMoney($('preco').value)||'';
+  const baseOld=parseMoney($('precoAntigo').value)||'';
+  const baseStock=$('estoque').value||0;
+  const basePhoto=$('foto').value.trim();
+  for(const name of names){
+    const key=name.toLocaleLowerCase('pt-BR');
+    if(existing.has(key))continue;
+    variations.push(makeVariation({
+      variacao:name,
+      cor:name,
+      sku_variacao:buildVariationSku(name),
+      preco:basePrice,
+      preco_antigo:baseOld,
+      estoque:baseStock,
+      foto_url:basePhoto
+    }));
+    existing.add(key);
+    added++;
+  }
+  renderVariations();
+  if(added){
+    $('variationBulk').value='';
+    toast(added+' variação'+(added===1?' criada':'ões criadas'));
+  }else{
+    toast('Nenhuma nova variação foi criada.');
+  }
+}
 function renderVariations(){
   const box=$('variationList');
   if(!variations.length){box.innerHTML='<div class="variation-empty">Nenhuma variação adicionada. O produto será salvo como produto simples.</div>';return}
@@ -130,7 +183,7 @@ function groupProducts(list=products){
   });
   return groups;
 }
-function resetForm(){editingGroup=null;active=true;variations=[];$('form').reset();$('estoque').value=0;$('id').value='';$('activeSwitch').classList.add('on');$('formTitle').textContent='Novo produto';$('formSub').textContent='Cadastre um produto simples ou com variações';$('saveBtn').textContent='Salvar produto';$('deleteBtn').style.display='none';renderVariations()}
+function resetForm(){editingGroup=null;active=true;variations=[];$('form').reset();$('estoque').value=0;$('id').value='';if($('variationBulk'))$('variationBulk').value='';$('activeSwitch').classList.add('on');$('formTitle').textContent='Novo produto';$('formSub').textContent='Cadastre um produto simples ou com variações';$('saveBtn').textContent='Salvar produto';$('deleteBtn').style.display='none';renderVariations()}
 function editGroup(key){
   const g=groupProducts().find(x=>x.key===key);if(!g)return;
   editingGroup=g;const first=g.items[0];active=g.items.some(p=>!!p.ativo);
@@ -181,6 +234,7 @@ async function saveProduct(){
     }
     for(const p of oldItems){if(!keptIds.has(String(p.id)))await api('delete',{id:p.id})}
   }else{
+    if(!$('preco').value.trim())throw new Error('Informe o preço do produto simples ou adicione pelo menos uma variação.');
     const simple={id:oldItems[0]?.id||'',titulo:base.titulo,descricao:base.descricao,preco:parseMoney($('preco').value),preco_antigo:parseMoney($('precoAntigo').value)||null,categoria:base.categoria,foto_url:base.foto_url,estoque:Math.max(0,Number($('estoque').value)||0),ativo:base.ativo,etiqueta:base.etiqueta,produto_pai:'',variacao:'',cor:'',sku_variacao:''};
     if(simple.id){await api('update',{produto:simple});for(const p of oldItems.slice(1))await api('delete',{id:p.id})}else await api('create',{produto:simple});
   }
@@ -212,6 +266,8 @@ $('deleteBtn').onclick=async()=>{
   try{for(const p of editingGroup.items)await api('delete',{id:p.id});toast('Produto excluído');resetForm();await loadProducts()}catch(e){toast(e.message)}
 };
 $('addVariationBtn').onclick=()=>{variations.push(makeVariation({preco:parseMoney($('preco').value)||'',preco_antigo:parseMoney($('precoAntigo').value)||'',estoque:$('estoque').value||0,foto_url:$('foto').value.trim()}));renderVariations()};
+$('createVariationsBtn').onclick=createVariationsFromList;
+$('clearVariationBulkBtn').onclick=()=>{$('variationBulk').value='';$('variationBulk').focus()};
 $('activeSwitch').onclick=()=>{active=!active;$('activeSwitch').classList.toggle('on',active)};
 $('reloadBtn').onclick=loadProducts;
 $('clearBtn').onclick=resetForm;
