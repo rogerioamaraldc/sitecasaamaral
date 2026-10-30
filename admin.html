@@ -26,6 +26,7 @@ linear-gradient(180deg,#fbfcfd,var(--bg))}
 .userchip{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);font-size:.74rem;color:var(--muted)}
 .userchip strong{color:var(--text)}
 [hidden]{display:none!important}
+.variation-section{grid-column:1/-1;border:1px solid var(--line);border-radius:13px;background:#fbfcfd;padding:14px;margin-top:2px}.variation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.variation-head strong{font-size:.86rem}.variation-head span{display:block;color:var(--muted);font-size:.71rem;margin-top:2px}.variation-list{display:grid;gap:10px}.variation-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px}.variation-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.variation-card-head strong{font-size:.82rem}.variation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.variation-grid .wide{grid-column:1/-1}.variation-remove{min-height:32px;padding:0 10px;border:1px solid #f0caca;border-radius:9px;background:#fff;color:var(--danger);font-weight:700}.variation-empty{padding:12px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.76rem;text-align:center}.groupbadge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#fff8dc;color:#7a5a00;font-size:.67rem;font-weight:800;margin-top:4px}
 @media(max-width:1080px){.grid{grid-template-columns:1fr}.conn{min-width:0}.pagehead{display:block}.conn{margin-top:16px}}@media(max-width:700px){.shell{width:min(100% - 18px,1450px)}.badge{display:none}.right .btn:first-child{display:none}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.tools{grid-template-columns:1fr 1fr}.search{grid-column:1/-1}}
 </style>
 </head>
@@ -51,24 +52,25 @@ linear-gradient(180deg,#fbfcfd,var(--bg))}
 <section class="grid">
 <aside class="panel"><div class="ph"><div><h2 id="formTitle">Novo produto</h2><small id="formSub">Cadastre no Google Sheets</small></div><button class="btn" id="clearBtn">Limpar</button></div><div class="pb">
 <form id="form"><input type="hidden" id="id"><div class="formgrid">
-<div class="field full"><label>Título</label><input id="titulo" required maxlength="120"></div>
+<div class="field full"><label>Nome do produto</label><input id="titulo" required maxlength="120" placeholder="Ex.: ESMALTE QUALYVINI 900ML"></div>
 <div class="field full"><label>Descrição</label><textarea id="descricao" maxlength="600"></textarea></div>
-<div class="field"><label>Preço</label><input id="preco" required inputmode="decimal" placeholder="299,90"></div>
-<div class="field"><label>Preço anterior</label><input id="precoAntigo" inputmode="decimal"></div>
 <div class="field"><label>Categoria</label><input id="categoria" required list="cats"><datalist id="cats"><option value="Materiais básicos"><option value="Ferramentas"><option value="Elétrica"><option value="Hidráulica"><option value="Tintas"><option value="Ferragens"><option value="Banheiro"><option value="Acabamento"><option value="Impermeabilização"></datalist></div>
-<div class="field"><label>Estoque</label><input id="estoque" type="number" min="0" value="0"></div>
-<div class="field full"><label>URL da foto</label><input id="foto" type="url" placeholder="https://..."></div>
+<div class="field"><label>Etiqueta</label><input id="etiqueta" maxlength="40" placeholder="Oferta, Mais vendido..."></div>
+<div class="field full"><label>Foto principal (opcional)</label><input id="foto" type="url" placeholder="https://..."></div>
 
-<div class="field full"><label>Produto pai</label><input id="produtoPai" maxlength="120" placeholder="Ex.: ESMALTE QUALYVINI 900ML"></div>
-<div class="field"><label>Variação</label><input id="variacao" maxlength="80" placeholder="Ex.: Verde Colonial"></div>
-<div class="field"><label>Cor</label><input id="cor" maxlength="80" placeholder="Ex.: Verde Colonial"></div>
-<div class="field full"><label>SKU da variação</label><input id="skuVariacao" maxlength="100" placeholder="Ex.: QUALY900-VERDE-COLONIAL"></div>
+<div class="field"><label>Preço do produto simples</label><input id="preco" required inputmode="decimal" placeholder="299,90"></div>
+<div class="field"><label>Preço anterior</label><input id="precoAntigo" inputmode="decimal"></div>
+<div class="field"><label>Estoque do produto simples</label><input id="estoque" type="number" min="0" value="0"></div>
+<div class="field"><div class="switchrow"><div class="switchcopy"><strong>Produto ativo</strong><span>Controla a exibição no site.</span></div><button type="button" class="switch on" id="activeSwitch"></button></div></div>
 
-<div class="field full"><label>Etiqueta</label><input id="etiqueta" maxlength="40" placeholder="Oferta, Mais vendido..."></div>
-<div class="field full"><div class="switchrow"><div class="switchcopy"><strong>Produto ativo</strong><span>Produtos inativos não aparecerão no site público.</span></div><button type="button" class="switch on" id="activeSwitch"></button></div></div>
-</div><div class="actions"><button class="btn primary" type="submit" id="saveBtn">Salvar produto</button><button class="btn danger" type="button" id="deleteBtn" style="display:none">Excluir</button></div></form>
+<div class="variation-section">
+  <div class="variation-head"><div><strong>Variações do produto</strong><span>Opcional. Adicione quantas cores, tamanhos ou modelos quiser.</span></div><button class="btn accent" type="button" id="addVariationBtn">+ Adicionar variação</button></div>
+  <div class="variation-list" id="variationList"></div>
+</div>
+</div>
+<div class="actions"><button class="btn primary" type="submit" id="saveBtn">Salvar produto</button><button class="btn danger" type="button" id="deleteBtn" style="display:none">Excluir produto</button></div></form>
 </div></aside>
-<section class="panel"><div class="ph"><div><h2>Produtos no Google Sheets</h2><small id="count">0 produtos</small></div><button class="btn" id="reloadBtn">Atualizar</button></div><div class="tools"><div class="search"><span>⌕</span><input id="search" placeholder="Buscar título, categoria ou ID"></div><select id="filter"><option value="all">Todos</option><option value="active">Ativos</option><option value="inactive">Inativos</option></select><select id="sort"><option value="newest">Atualizados</option><option value="title">Título A–Z</option><option value="priceAsc">Menor preço</option><option value="priceDesc">Maior preço</option></select></div><div class="tablewrap"><table><thead><tr><th>Produto</th><th>ID</th><th>Preço</th><th>Estoque</th><th>Status</th><th>Ações</th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty" style="display:none">Nenhum produto encontrado.</div></div></section>
+<section class="panel"><div class="ph"><div><h2>Produtos no Google Sheets</h2><small id="count">0 produtos</small></div><button class="btn" id="reloadBtn">Atualizar</button></div><div class="tools"><div class="search"><span>⌕</span><input id="search" placeholder="Buscar título, categoria ou ID"></div><select id="filter"><option value="all">Todos</option><option value="active">Ativos</option><option value="inactive">Inativos</option></select><select id="sort"><option value="newest">Atualizados</option><option value="title">Título A–Z</option><option value="priceAsc">Menor preço</option><option value="priceDesc">Maior preço</option></select></div><div class="tablewrap"><table><thead><tr><th>Produto</th><th>Variações</th><th>Preço</th><th>Estoque</th><th>Status</th><th>Ações</th></tr></thead><tbody id="rows"></tbody></table><div class="empty" id="empty" style="display:none">Nenhum produto encontrado.</div></div></section>
 </section></div></main></div><div class="toast" id="toast"></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
@@ -77,7 +79,7 @@ const SUPABASE_PUBLISHABLE_KEY='sb_publishable_8yrSvrwmGMDkucgKaVXBZA_XBbhn5ic';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY);
 
 const $=id=>document.getElementById(id);
-let products=[],editingId=null,active=true,busy=false,currentUser=null;
+let products=[],editingGroup=null,active=true,busy=false,currentUser=null,variations=[];
 const money=v=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(Number(v)||0);
 
 function parseMoney(v){
@@ -87,139 +89,102 @@ function parseMoney(v){
   else if(s.includes(','))s=s.replace(',','.');
   return Number(s)||0;
 }
-function toast(msg){
-  $('toast').textContent=msg;$('toast').classList.add('show');
-  setTimeout(()=>$('toast').classList.remove('show'),2600);
-}
-function setConn(ok,title,text){
-  $('dot').className='dot '+(ok?'ok':'bad');
-  $('connTitle').textContent=title;
-  $('connText').textContent=text;
-}
-function showLogin(message=''){
-  $('appShell').hidden=true;
-  $('loginScreen').hidden=false;
-  $('loginPassword').value='';
-  $('loginError').textContent=message;
-  $('loginError').classList.toggle('show',!!message);
-}
-function showApp(){
-  $('loginScreen').hidden=true;
-  $('appShell').hidden=false;
-  $('userEmail').textContent=currentUser?.email||'Administrador';
-}
-async function isAdmin(){
-  const {data,error}=await sb.rpc('is_admin');
-  if(error)throw new Error('Não foi possível validar o administrador: '+error.message);
-  return data===true;
-}
-async function authenticate(email,password){
-  const {data,error}=await sb.auth.signInWithPassword({email,password});
-  if(error)throw new Error('E-mail ou senha inválidos.');
-  currentUser=data.user;
-  const allowed=await isAdmin();
-  if(!allowed){
-    await sb.auth.signOut();
-    currentUser=null;
-    throw new Error('Este usuário não possui acesso administrativo.');
-  }
-  return true;
-}
-async function api(action,extra={}){
-  const {data,error}=await sb.functions.invoke('produtos-admin',{
-    body:{action,...extra}
+function toast(msg){$('toast').textContent=msg;$('toast').classList.add('show');setTimeout(()=>$('toast').classList.remove('show'),2600)}
+function setConn(ok,title,text){$('dot').className='dot '+(ok?'ok':'bad');$('connTitle').textContent=title;$('connText').textContent=text}
+function showLogin(message=''){$('appShell').hidden=true;$('loginScreen').hidden=false;$('loginPassword').value='';$('loginError').textContent=message;$('loginError').classList.toggle('show',!!message)}
+function showApp(){$('loginScreen').hidden=true;$('appShell').hidden=false;$('userEmail').textContent=currentUser?.email||'Administrador'}
+async function isAdmin(){const {data,error}=await sb.rpc('is_admin');if(error)throw new Error('Não foi possível validar o administrador: '+error.message);return data===true}
+async function authenticate(email,password){const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw new Error('E-mail ou senha inválidos.');currentUser=data.user;const allowed=await isAdmin();if(!allowed){await sb.auth.signOut();currentUser=null;throw new Error('Este usuário não possui acesso administrativo.')}return true}
+async function api(action,extra={}){const {data,error}=await sb.functions.invoke('produtos-admin',{body:{action,...extra}});if(error){const msg=error.context?.body?.erro||error.context?.body?.message||error.message||'Falha ao acessar a função segura.';throw new Error(msg)}if(!data?.ok)throw new Error(data?.erro||'Falha na operação.');return data}
+async function loadProducts(){if(busy)return;busy=true;$('reloadBtn').disabled=true;try{const data=await api('adminList');products=data.produtos||[];setConn(true,'Conexão segura ativa','Supabase → Edge Function → Google Sheets.');render()}catch(e){setConn(false,'Edge Function indisponível',e.message);toast(e.message)}finally{busy=false;$('reloadBtn').disabled=false}}
+function icon(c=''){c=c.toLowerCase();if(c.includes('ferrament'))return'🔧';if(c.includes('elétr')||c.includes('eletr'))return'⚡';if(c.includes('hidrául')||c.includes('hidraul'))return'🚰';if(c.includes('tinta'))return'🎨';if(c.includes('banheiro'))return'🚿';if(c.includes('ferragen'))return'🔩';if(c.includes('material'))return'🧱';return'📦'}
+function esc(v=''){return String(v).replace(/[&<>'"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[m]))}
+function uid(){return 'v_'+Date.now().toString(36)+Math.random().toString(36).slice(2,8)}
+function makeVariation(p={}){return{localId:uid(),id:p.id||'',variacao:p.variacao||'',cor:p.cor||'',sku_variacao:p.sku_variacao||'',preco:p.preco??'',preco_antigo:p.preco_antigo??'',estoque:p.estoque??0,foto_url:p.foto_url||''}}
+function renderVariations(){
+  const box=$('variationList');
+  if(!variations.length){box.innerHTML='<div class="variation-empty">Nenhuma variação adicionada. O produto será salvo como produto simples.</div>';return}
+  box.innerHTML=variations.map((v,i)=>`<div class="variation-card" data-vcard="${v.localId}">
+    <div class="variation-card-head"><strong>Variação ${i+1}</strong><button type="button" class="variation-remove" data-remove-var="${v.localId}">Remover</button></div>
+    <div class="variation-grid">
+      <div class="field"><label>Nome da variação</label><input data-v="variacao" value="${esc(v.variacao)}" placeholder="Ex.: Azul" required></div>
+      <div class="field"><label>Cor</label><input data-v="cor" value="${esc(v.cor)}" placeholder="Ex.: Azul"></div>
+      <div class="field"><label>Preço</label><input data-v="preco" value="${esc(String(v.preco??'').replace('.',','))}" inputmode="decimal" placeholder="45,00" required></div>
+      <div class="field"><label>Preço anterior</label><input data-v="preco_antigo" value="${esc(v.preco_antigo?String(v.preco_antigo).replace('.',','):'')}" inputmode="decimal"></div>
+      <div class="field"><label>Estoque</label><input data-v="estoque" type="number" min="0" value="${Number(v.estoque)||0}"></div>
+      <div class="field"><label>SKU</label><input data-v="sku_variacao" value="${esc(v.sku_variacao)}" placeholder="QUALY900-AZUL"></div>
+      <div class="field wide"><label>URL da foto da variação</label><input data-v="foto_url" type="url" value="${esc(v.foto_url)}" placeholder="https://..."></div>
+    </div></div>`).join('');
+  document.querySelectorAll('[data-vcard]').forEach(card=>{
+    const localId=card.dataset.vcard;
+    card.querySelectorAll('[data-v]').forEach(inp=>inp.addEventListener('input',()=>{const v=variations.find(x=>x.localId===localId);if(v)v[inp.dataset.v]=inp.value}));
   });
-  if(error){
-    const msg=error.context?.body?.erro || error.context?.body?.message || error.message || 'Falha ao acessar a função segura.';
-    throw new Error(msg);
+  document.querySelectorAll('[data-remove-var]').forEach(b=>b.onclick=()=>{variations=variations.filter(v=>v.localId!==b.dataset.removeVar);renderVariations()});
+}
+function groupProducts(list=products){
+  const groups=[];const map=new Map();
+  list.forEach(p=>{
+    const key=(p.produto_pai||'').trim()?('group:'+p.produto_pai.trim().toLowerCase()):('single:'+p.id);
+    if(!map.has(key)){const g={key,title:(p.produto_pai||p.titulo||'').trim(),items:[]};map.set(key,g);groups.push(g)}
+    map.get(key).items.push(p);
+  });
+  return groups;
+}
+function resetForm(){editingGroup=null;active=true;variations=[];$('form').reset();$('estoque').value=0;$('id').value='';$('activeSwitch').classList.add('on');$('formTitle').textContent='Novo produto';$('formSub').textContent='Cadastre um produto simples ou com variações';$('saveBtn').textContent='Salvar produto';$('deleteBtn').style.display='none';renderVariations()}
+function editGroup(key){
+  const g=groupProducts().find(x=>x.key===key);if(!g)return;
+  editingGroup=g;const first=g.items[0];active=g.items.some(p=>!!p.ativo);
+  $('id').value=first.id||'';$('titulo').value=g.title||first.titulo||'';$('descricao').value=first.descricao||'';$('categoria').value=first.categoria||'';$('etiqueta').value=first.etiqueta||'';$('foto').value=first.foto_url||'';
+  if((first.produto_pai||'').trim()){
+    $('preco').value='';$('precoAntigo').value='';$('estoque').value=0;
+    variations=g.items.map(makeVariation);
+  }else{
+    $('preco').value=String(first.preco??'').replace('.',',');$('precoAntigo').value=first.preco_antigo?String(first.preco_antigo).replace('.',','):'';$('estoque').value=first.estoque??0;variations=[];
   }
-  if(!data?.ok)throw new Error(data?.erro||'Falha na operação.');
-  return data;
-}
-async function loadProducts(){
-  if(busy)return;
-  busy=true;$('reloadBtn').disabled=true;
-  try{
-    const data=await api('adminList');
-    products=data.produtos||[];
-    setConn(true,'Conexão segura ativa','Supabase → Edge Function → Google Sheets.');
-    render();
-  }catch(e){
-    setConn(false,'Edge Function indisponível',e.message);
-    toast(e.message);
-  }finally{
-    busy=false;$('reloadBtn').disabled=false;
-  }
-}
-function icon(c=''){
-  c=c.toLowerCase();
-  if(c.includes('ferrament'))return'🔧';
-  if(c.includes('elétr')||c.includes('eletr'))return'⚡';
-  if(c.includes('hidrául')||c.includes('hidraul'))return'🚰';
-  if(c.includes('tinta'))return'🎨';
-  if(c.includes('banheiro'))return'🚿';
-  if(c.includes('ferragen'))return'🔩';
-  if(c.includes('material'))return'🧱';
-  return'📦';
-}
-function resetForm(){
-  editingId=null;active=true;$('form').reset();$('estoque').value=0;$('id').value='';
-  $('activeSwitch').classList.add('on');
-  $('formTitle').textContent='Novo produto';
-  $('formSub').textContent='Cadastre no Google Sheets';
-  $('saveBtn').textContent='Salvar produto';
-  $('deleteBtn').style.display='none';
-}
-function edit(id){
-  const p=products.find(x=>String(x.id)===String(id));if(!p)return;
-  editingId=p.id;active=!!p.ativo;
-  $('id').value=p.id;$('titulo').value=p.titulo||'';$('descricao').value=p.descricao||'';
-  $('preco').value=String(p.preco??'').replace('.',',');
-  $('precoAntigo').value=p.preco_antigo?String(p.preco_antigo).replace('.',','):'';
-  $('categoria').value=p.categoria||'';$('foto').value=p.foto_url||'';
-  $('produtoPai').value=p.produto_pai||'';
-  $('variacao').value=p.variacao||'';
-  $('cor').value=p.cor||'';
-  $('skuVariacao').value=p.sku_variacao||'';
-  $('estoque').value=p.estoque??0;$('etiqueta').value=p.etiqueta||'';
-  $('activeSwitch').classList.toggle('on',active);
-  $('formTitle').textContent='Editar produto';
-  $('formSub').textContent='ID '+p.id+' — salva na mesma linha';
-  $('saveBtn').textContent='Salvar alterações';
-  $('deleteBtn').style.display='inline-flex';
-  window.scrollTo({top:0,behavior:'smooth'});
+  $('activeSwitch').classList.toggle('on',active);$('formTitle').textContent='Editar produto';$('formSub').textContent=(variations.length?variations.length+' variação(ões)':'Produto simples');$('saveBtn').textContent='Salvar alterações';$('deleteBtn').style.display='inline-flex';renderVariations();window.scrollTo({top:0,behavior:'smooth'});
 }
 function render(){
   const q=$('search').value.trim().toLowerCase(),f=$('filter').value,s=$('sort').value;
-  let data=products.filter(p=>{
-    const hay=(p.id+' '+p.titulo+' '+p.categoria+' '+(p.produto_pai||'')+' '+(p.variacao||'')+' '+(p.cor||'')+' '+(p.sku_variacao||'')).toLowerCase();
-    return(!q||hay.includes(q))&&(f==='all'||(f==='active'&&p.ativo)||(f==='inactive'&&!p.ativo));
+  let data=groupProducts().filter(g=>{
+    const hay=(g.title+' '+g.items.map(p=>[p.id,p.titulo,p.categoria,p.variacao,p.cor,p.sku_variacao].join(' ')).join(' ')).toLowerCase();
+    const anyActive=g.items.some(p=>p.ativo),allInactive=g.items.every(p=>!p.ativo);
+    return(!q||hay.includes(q))&&(f==='all'||(f==='active'&&anyActive)||(f==='inactive'&&allInactive));
   });
-  if(s==='title')data.sort((a,b)=>String(a.titulo).localeCompare(String(b.titulo),'pt-BR'));
-  if(s==='priceAsc')data.sort((a,b)=>a.preco-b.preco);
-  if(s==='priceDesc')data.sort((a,b)=>b.preco-a.preco);
-  if(s==='newest')data.sort((a,b)=>String(b.atualizado_em||'').localeCompare(String(a.atualizado_em||'')));
-  $('count').textContent=products.length+' produto'+(products.length===1?'':'s');
-  $('rows').innerHTML=data.map(p=>`<tr>
-    <td><div class="prod"><div class="thumb">${p.foto_url?`<img src="${p.foto_url}" alt="">`:icon(p.categoria)}</div>
-    <div><strong>${p.titulo}</strong><small>${p.categoria}${p.variacao?' · '+p.variacao:''}${p.cor && p.cor!==p.variacao?' · '+p.cor:''}${p.etiqueta?' · '+p.etiqueta:''}</small></div></div></td>
-    <td>${String(p.id).slice(0,12)}</td><td><strong>${money(p.preco)}</strong></td><td>${p.estoque??0}</td>
-    <td><span class="status ${p.ativo?'on':'off'}">${p.ativo?'Ativo':'Inativo'}</span></td>
-    <td><div class="rowactions"><button class="btn" data-edit="${p.id}">Editar</button>
-    <button class="btn" data-toggle="${p.id}">${p.ativo?'Desativar':'Ativar'}</button></div></td></tr>`).join('');
+  if(s==='title')data.sort((a,b)=>a.title.localeCompare(b.title,'pt-BR'));
+  if(s==='priceAsc')data.sort((a,b)=>Math.min(...a.items.map(x=>Number(x.preco)||0))-Math.min(...b.items.map(x=>Number(x.preco)||0)));
+  if(s==='priceDesc')data.sort((a,b)=>Math.max(...b.items.map(x=>Number(x.preco)||0))-Math.max(...a.items.map(x=>Number(x.preco)||0)));
+  if(s==='newest')data.sort((a,b)=>String(b.items[0]?.atualizado_em||'').localeCompare(String(a.items[0]?.atualizado_em||'')));
+  $('count').textContent=data.length+' produto'+(data.length===1?'':'s');
+  $('rows').innerHTML=data.map(g=>{
+    const first=g.items[0],variantCount=(first.produto_pai||'').trim()?g.items.length:0,prices=g.items.map(x=>Number(x.preco)||0),min=Math.min(...prices),max=Math.max(...prices),totalStock=g.items.reduce((n,x)=>n+(Number(x.estoque)||0),0),isActive=g.items.some(x=>x.ativo);
+    const priceText=min===max?money(min):money(min)+' – '+money(max);
+    return `<tr><td><div class="prod"><div class="thumb">${first.foto_url?`<img src="${esc(first.foto_url)}" alt="">`:icon(first.categoria)}</div><div><strong>${esc(g.title)}</strong><small>${esc(first.categoria||'')}${first.etiqueta?' · '+esc(first.etiqueta):''}</small>${variantCount?`<span class="groupbadge">${variantCount} variação${variantCount===1?'':'ões'}</span>`:''}</div></div></td><td>${variantCount||'Produto simples'}</td><td><strong>${priceText}</strong></td><td>${totalStock}</td><td><span class="status ${isActive?'on':'off'}">${isActive?'Ativo':'Inativo'}</span></td><td><div class="rowactions"><button class="btn" data-edit-group="${esc(g.key)}">Editar</button><button class="btn" data-toggle-group="${esc(g.key)}">${isActive?'Desativar':'Ativar'}</button></div></td></tr>`;
+  }).join('');
   $('empty').style.display=data.length?'none':'block';
-  document.querySelectorAll('[data-edit]').forEach(b=>b.onclick=()=>edit(b.dataset.edit));
-  document.querySelectorAll('[data-toggle]').forEach(b=>b.onclick=()=>toggle(b.dataset.toggle));
+  document.querySelectorAll('[data-edit-group]').forEach(b=>b.onclick=()=>editGroup(b.dataset.editGroup));
+  document.querySelectorAll('[data-toggle-group]').forEach(b=>b.onclick=()=>toggleGroup(b.dataset.toggleGroup));
 }
-async function toggle(id){
-  const p=products.find(x=>String(x.id)===String(id));if(!p)return;
-  try{
-    await api('setActive',{id:p.id,ativo:!p.ativo});
-    toast(!p.ativo?'Produto ativado':'Produto desativado');
-    await loadProducts();
-  }catch(e){toast(e.message)}
+async function toggleGroup(key){const g=groupProducts().find(x=>x.key===key);if(!g)return;const newActive=!g.items.some(x=>x.ativo);try{for(const p of g.items)await api('setActive',{id:p.id,ativo:newActive});toast(newActive?'Produto ativado':'Produto desativado');await loadProducts()}catch(e){toast(e.message)}}
+function collectVariationsFromDom(){
+  document.querySelectorAll('[data-vcard]').forEach(card=>{const v=variations.find(x=>x.localId===card.dataset.vcard);if(!v)return;card.querySelectorAll('[data-v]').forEach(inp=>v[inp.dataset.v]=inp.value)});
+  return variations;
 }
-
+function buildBase(){return{titulo:$('titulo').value.trim(),descricao:$('descricao').value.trim(),categoria:$('categoria').value.trim(),foto_url:$('foto').value.trim(),etiqueta:$('etiqueta').value.trim(),ativo:active}}
+async function saveProduct(){
+  const base=buildBase();if(!base.titulo)throw new Error('Nome do produto é obrigatório.');if(!base.categoria)throw new Error('Categoria é obrigatória.');
+  const vars=collectVariationsFromDom().filter(v=>String(v.variacao||'').trim());
+  const oldItems=editingGroup?.items||[];const oldIds=new Set(oldItems.map(x=>String(x.id)));const keptIds=new Set();
+  if(vars.length){
+    for(const v of vars){
+      const produto={id:v.id||'',titulo:base.titulo+' - '+String(v.variacao).trim(),descricao:base.descricao,preco:parseMoney(v.preco),preco_antigo:parseMoney(v.preco_antigo)||null,categoria:base.categoria,foto_url:String(v.foto_url||'').trim()||base.foto_url,estoque:Math.max(0,Number(v.estoque)||0),ativo:base.ativo,etiqueta:base.etiqueta,produto_pai:base.titulo,variacao:String(v.variacao||'').trim(),cor:String(v.cor||'').trim(),sku_variacao:String(v.sku_variacao||'').trim()};
+      if(v.id&&oldIds.has(String(v.id))){await api('update',{produto});keptIds.add(String(v.id))}else{await api('create',{produto})}
+    }
+    for(const p of oldItems){if(!keptIds.has(String(p.id)))await api('delete',{id:p.id})}
+  }else{
+    const simple={id:oldItems[0]?.id||'',titulo:base.titulo,descricao:base.descricao,preco:parseMoney($('preco').value),preco_antigo:parseMoney($('precoAntigo').value)||null,categoria:base.categoria,foto_url:base.foto_url,estoque:Math.max(0,Number($('estoque').value)||0),ativo:base.ativo,etiqueta:base.etiqueta,produto_pai:'',variacao:'',cor:'',sku_variacao:''};
+    if(simple.id){await api('update',{produto:simple});for(const p of oldItems.slice(1))await api('delete',{id:p.id})}else await api('create',{produto:simple});
+  }
+}
 $('loginForm').addEventListener('submit',async e=>{
   e.preventDefault();
   const email=$('loginEmail').value.trim(),password=$('loginPassword').value;
@@ -239,29 +204,14 @@ $('logoutBtn').onclick=async()=>{
 };
 $('form').addEventListener('submit',async e=>{
   e.preventDefault();if(busy)return;
-  const produto={
-    id:editingId||'',titulo:$('titulo').value.trim(),descricao:$('descricao').value.trim(),
-    preco:parseMoney($('preco').value),preco_antigo:parseMoney($('precoAntigo').value)||null,
-    categoria:$('categoria').value.trim(),foto_url:$('foto').value.trim(),
-    produto_pai:$('produtoPai').value.trim(),
-    variacao:$('variacao').value.trim(),
-    cor:$('cor').value.trim(),
-    sku_variacao:$('skuVariacao').value.trim(),
-    estoque:Math.max(0,Number($('estoque').value)||0),ativo:active,etiqueta:$('etiqueta').value.trim()
-  };
-  try{
-    busy=true;$('saveBtn').disabled=true;
-    await api(editingId?'update':'create',{produto});
-    toast(editingId?'Produto atualizado':'Produto cadastrado');
-    resetForm();await loadProducts();
-  }catch(err){toast(err.message)}
-  finally{busy=false;$('saveBtn').disabled=false}
+  try{busy=true;$('saveBtn').disabled=true;await saveProduct();toast(editingGroup?'Produto atualizado':'Produto cadastrado');resetForm();await loadProducts()}
+  catch(err){toast(err.message)}finally{busy=false;$('saveBtn').disabled=false}
 });
 $('deleteBtn').onclick=async()=>{
-  if(!editingId||!confirm('Excluir este produto definitivamente da planilha?'))return;
-  try{await api('delete',{id:editingId});toast('Produto excluído');resetForm();await loadProducts()}
-  catch(e){toast(e.message)}
+  if(!editingGroup||!confirm('Excluir este produto e todas as suas variações definitivamente da planilha?'))return;
+  try{for(const p of editingGroup.items)await api('delete',{id:p.id});toast('Produto excluído');resetForm();await loadProducts()}catch(e){toast(e.message)}
 };
+$('addVariationBtn').onclick=()=>{variations.push(makeVariation({preco:parseMoney($('preco').value)||'',preco_antigo:parseMoney($('precoAntigo').value)||'',estoque:$('estoque').value||0,foto_url:$('foto').value.trim()}));renderVariations()};
 $('activeSwitch').onclick=()=>{active=!active;$('activeSwitch').classList.toggle('on',active)};
 $('reloadBtn').onclick=loadProducts;
 $('clearBtn').onclick=resetForm;
