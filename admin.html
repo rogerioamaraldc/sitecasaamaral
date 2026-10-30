@@ -58,6 +58,12 @@ linear-gradient(180deg,#fbfcfd,var(--bg))}
 <div class="field"><label>Categoria</label><input id="categoria" required list="cats"><datalist id="cats"><option value="Materiais básicos"><option value="Ferramentas"><option value="Elétrica"><option value="Hidráulica"><option value="Tintas"><option value="Ferragens"><option value="Banheiro"><option value="Acabamento"><option value="Impermeabilização"></datalist></div>
 <div class="field"><label>Estoque</label><input id="estoque" type="number" min="0" value="0"></div>
 <div class="field full"><label>URL da foto</label><input id="foto" type="url" placeholder="https://..."></div>
+
+<div class="field full"><label>Produto pai</label><input id="produtoPai" maxlength="120" placeholder="Ex.: ESMALTE QUALYVINI 900ML"></div>
+<div class="field"><label>Variação</label><input id="variacao" maxlength="80" placeholder="Ex.: Verde Colonial"></div>
+<div class="field"><label>Cor</label><input id="cor" maxlength="80" placeholder="Ex.: Verde Colonial"></div>
+<div class="field full"><label>SKU da variação</label><input id="skuVariacao" maxlength="100" placeholder="Ex.: QUALY900-VERDE-COLONIAL"></div>
+
 <div class="field full"><label>Etiqueta</label><input id="etiqueta" maxlength="40" placeholder="Oferta, Mais vendido..."></div>
 <div class="field full"><div class="switchrow"><div class="switchcopy"><strong>Produto ativo</strong><span>Produtos inativos não aparecerão no site público.</span></div><button type="button" class="switch on" id="activeSwitch"></button></div></div>
 </div><div class="actions"><button class="btn primary" type="submit" id="saveBtn">Salvar produto</button><button class="btn danger" type="button" id="deleteBtn" style="display:none">Excluir</button></div></form>
@@ -171,6 +177,10 @@ function edit(id){
   $('preco').value=String(p.preco??'').replace('.',',');
   $('precoAntigo').value=p.preco_antigo?String(p.preco_antigo).replace('.',','):'';
   $('categoria').value=p.categoria||'';$('foto').value=p.foto_url||'';
+  $('produtoPai').value=p.produto_pai||'';
+  $('variacao').value=p.variacao||'';
+  $('cor').value=p.cor||'';
+  $('skuVariacao').value=p.sku_variacao||'';
   $('estoque').value=p.estoque??0;$('etiqueta').value=p.etiqueta||'';
   $('activeSwitch').classList.toggle('on',active);
   $('formTitle').textContent='Editar produto';
@@ -182,7 +192,7 @@ function edit(id){
 function render(){
   const q=$('search').value.trim().toLowerCase(),f=$('filter').value,s=$('sort').value;
   let data=products.filter(p=>{
-    const hay=(p.id+' '+p.titulo+' '+p.categoria).toLowerCase();
+    const hay=(p.id+' '+p.titulo+' '+p.categoria+' '+(p.produto_pai||'')+' '+(p.variacao||'')+' '+(p.cor||'')+' '+(p.sku_variacao||'')).toLowerCase();
     return(!q||hay.includes(q))&&(f==='all'||(f==='active'&&p.ativo)||(f==='inactive'&&!p.ativo));
   });
   if(s==='title')data.sort((a,b)=>String(a.titulo).localeCompare(String(b.titulo),'pt-BR'));
@@ -192,7 +202,7 @@ function render(){
   $('count').textContent=products.length+' produto'+(products.length===1?'':'s');
   $('rows').innerHTML=data.map(p=>`<tr>
     <td><div class="prod"><div class="thumb">${p.foto_url?`<img src="${p.foto_url}" alt="">`:icon(p.categoria)}</div>
-    <div><strong>${p.titulo}</strong><small>${p.categoria}${p.etiqueta?' · '+p.etiqueta:''}</small></div></div></td>
+    <div><strong>${p.titulo}</strong><small>${p.categoria}${p.variacao?' · '+p.variacao:''}${p.cor && p.cor!==p.variacao?' · '+p.cor:''}${p.etiqueta?' · '+p.etiqueta:''}</small></div></div></td>
     <td>${String(p.id).slice(0,12)}</td><td><strong>${money(p.preco)}</strong></td><td>${p.estoque??0}</td>
     <td><span class="status ${p.ativo?'on':'off'}">${p.ativo?'Ativo':'Inativo'}</span></td>
     <td><div class="rowactions"><button class="btn" data-edit="${p.id}">Editar</button>
@@ -233,6 +243,10 @@ $('form').addEventListener('submit',async e=>{
     id:editingId||'',titulo:$('titulo').value.trim(),descricao:$('descricao').value.trim(),
     preco:parseMoney($('preco').value),preco_antigo:parseMoney($('precoAntigo').value)||null,
     categoria:$('categoria').value.trim(),foto_url:$('foto').value.trim(),
+    produto_pai:$('produtoPai').value.trim(),
+    variacao:$('variacao').value.trim(),
+    cor:$('cor').value.trim(),
+    sku_variacao:$('skuVariacao').value.trim(),
     estoque:Math.max(0,Number($('estoque').value)||0),ativo:active,etiqueta:$('etiqueta').value.trim()
   };
   try{
