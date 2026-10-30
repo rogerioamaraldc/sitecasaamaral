@@ -392,7 +392,7 @@ header{
       <div class="crumbs"><button id="backHome" style="border:0;background:transparent;color:inherit;padding:0;cursor:pointer">Início</button><span>›</span><strong>Produtos</strong></div>
       <div class="catalog-row">
         <div><h1>Produtos</h1><p>Encontre materiais para construção, ferramentas, hidráulica, elétrica, tintas e acabamento.</p><div class="db-status" id="dbStatus" data-type="loading">Carregando catálogo…</div></div>
-        <div class="stats"><strong id="visibleCount">12</strong> produtos encontrados</div>
+        <div class="stats"><strong id="visibleCount">0</strong> produtos encontrados</div>
       </div>
     </div>
     <div class="toolbar-wrap">
@@ -406,7 +406,7 @@ header{
     </div>
     <div class="shell content">
       <aside class="sidebar" id="sidebar"><h3>Categorias</h3><div class="filters" id="filters"></div></aside>
-      <div><div class="results-head"><span id="resultLabel">Todos os produtos</span><span>Preços de demonstração</span></div><div class="products" id="productsGrid"></div><div class="empty" id="emptyState">Nenhum produto encontrado.</div></div>
+      <div><div class="results-head"><span id="resultLabel">Todos os produtos</span><span>Produtos atualizados</span></div><div class="products" id="productsGrid"></div><div class="empty" id="emptyState">Nenhum produto encontrado.</div></div>
     </div>
   </section>
 </main>
@@ -422,8 +422,8 @@ header{
 <script>
 const CONFIG = {
   // Depois de publicar o Google Apps Script como Web App, cole a URL /exec aqui.
-  GOOGLE_SHEETS_API_URL: 'COLE_AQUI_A_URL_DO_APPS_SCRIPT',
-  DEMO_WHEN_NOT_CONFIGURED: true
+  GOOGLE_SHEETS_API_URL: 'https://script.google.com/macros/s/AKfycby8EA4JuMnrnhGE8OsCwhq0tul5HiG4OerfYltoJRC-g5OnyuBh7a5GrnyYhhDuGrQx/exec',
+  DEMO_WHEN_NOT_CONFIGURED: false
 };
 
 const DEMO_PRODUCTS = [{"id": "cimento", "name": "Cimento CP II 50 kg", "category": "Materiais básicos", "price": 39.9, "old": 44.9, "icon": "🧱", "tag": "Mais vendido", "desc": "Cimento de uso geral para concretos, argamassas e aplicações na obra."}, {"id": "argamassa", "name": "Argamassa AC-II 20 kg", "category": "Materiais básicos", "price": 29.9, "old": 34.9, "icon": "🪣", "tag": "Oferta", "desc": "Indicada para assentamento de revestimentos em ambientes internos e externos."}, {"id": "furadeira", "name": "Furadeira de impacto 800 W", "category": "Ferramentas", "price": 269.9, "old": 319.9, "icon": "🛠️", "tag": "Destaque", "desc": "Furadeira de impacto para perfuração em alvenaria, madeira e metal."}, {"id": "chave13", "name": "Chave combinada 13 mm", "category": "Ferramentas", "price": 18.9, "old": null, "icon": "🔧", "tag": "", "desc": "Chave combinada resistente para manutenção e uso profissional."}, {"id": "ducha", "name": "Ducha elétrica 6800 W", "category": "Banheiro", "price": 89.9, "old": 99.9, "icon": "🚿", "tag": "Novidade", "desc": "Ducha elétrica com regulagem de temperatura e instalação prática."}, {"id": "tinta", "name": "Tinta acrílica premium 18 L", "category": "Tintas", "price": 179.9, "old": 209.9, "icon": "🎨", "tag": "Oferta", "desc": "Tinta acrílica para paredes internas e externas, acabamento fosco."}, {"id": "cabo", "name": "Cabo elétrico 2,5 mm² — 100 m", "category": "Elétrica", "price": 149.9, "old": null, "icon": "⚡", "tag": "", "desc": "Cabo flexível para instalações elétricas residenciais e comerciais."}, {"id": "torneira", "name": "Torneira de mesa cromada", "category": "Hidráulica", "price": 79.9, "old": 89.9, "icon": "🚰", "tag": "Oferta", "desc": "Torneira de mesa cromada para banheiro ou cozinha."}, {"id": "impermeabilizante", "name": "Impermeabilizante 18 kg", "category": "Impermeabilização", "price": 129.9, "old": 149.9, "icon": "🧴", "tag": "", "desc": "Proteção contra umidade para lajes, paredes e áreas molhadas."}, {"id": "parafusos", "name": "Kit parafusos e buchas", "category": "Ferragens", "price": 24.9, "old": null, "icon": "🔩", "tag": "", "desc": "Kit para fixações diversas em alvenaria, madeira e superfícies variadas."}, {"id": "lampada", "name": "Lâmpada LED 12 W", "category": "Elétrica", "price": 12.9, "old": 15.9, "icon": "💡", "tag": "Economia", "desc": "Lâmpada LED de baixo consumo para iluminação residencial."}, {"id": "porcelanato", "name": "Porcelanato 60 × 60 cm", "category": "Acabamento", "price": 59.9, "old": 69.9, "icon": "◻️", "tag": "", "desc": "Porcelanato para ambientes internos com acabamento moderno."}];
@@ -504,7 +504,7 @@ async function loadProductsFromSheets() {
   const api = CONFIG.GOOGLE_SHEETS_API_URL.trim();
   if (!api || api.includes('COLE_AQUI')) {
     PRODUCTS = CONFIG.DEMO_WHEN_NOT_CONFIGURED ? DEMO_PRODUCTS.map(normalizeProduct).filter(p=>p.active) : [];
-    setDbStatus('Modo demonstração — conecte o Google Sheets para usar os produtos reais.', 'demo');
+    setDbStatus('Catálogo indisponível no momento.', 'demo');
     refreshCatalogUI();
     return;
   }
@@ -524,7 +524,7 @@ async function loadProductsFromSheets() {
   } catch (err) {
     console.error('Erro ao carregar produtos:', err);
     PRODUCTS = [];
-    setDbStatus('Não foi possível carregar o Google Sheets. Verifique a URL do Apps Script e a implantação.', 'error');
+    setDbStatus('Não foi possível carregar os produtos agora. Tente novamente em instantes.', 'error');
     refreshCatalogUI();
   }
 }
