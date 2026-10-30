@@ -26,7 +26,7 @@ linear-gradient(180deg,#fbfcfd,var(--bg))}
 .userchip{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;background:var(--surface2);border:1px solid var(--line);font-size:.74rem;color:var(--muted)}
 .userchip strong{color:var(--text)}
 [hidden]{display:none!important}
-.variation-section{grid-column:1/-1;border:1px solid var(--line);border-radius:13px;background:#fbfcfd;padding:14px;margin-top:2px}.variation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.variation-head strong{font-size:.86rem}.variation-head span{display:block;color:var(--muted);font-size:.71rem;margin-top:2px}.variation-bulk{margin:10px 0 12px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff}.variation-bulk label{display:block;margin-bottom:6px}.variation-bulk textarea{min-height:125px;background:var(--surface2)}.variation-bulk-help{color:var(--muted);font-size:.7rem;line-height:1.45;margin:6px 0 10px}.variation-bulk-actions{display:flex;gap:8px;flex-wrap:wrap}.variation-list{display:grid;gap:10px}.variation-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px}.variation-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.variation-card-head strong{font-size:.82rem}.variation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.variation-grid .wide{grid-column:1/-1}.stock-toggle-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--surface2)}.stock-toggle-row small{display:block;color:var(--muted);font-size:.68rem;margin-top:2px}.variation-remove{min-height:32px;padding:0 10px;border:1px solid #f0caca;border-radius:9px;background:#fff;color:var(--danger);font-weight:700}.variation-empty{padding:12px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.76rem;text-align:center}.groupbadge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#fff8dc;color:#7a5a00;font-size:.67rem;font-weight:800;margin-top:4px}
+.variation-section{grid-column:1/-1;border:1px solid var(--line);border-radius:13px;background:#fbfcfd;padding:14px;margin-top:2px}.variation-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}.variation-head strong{font-size:.86rem}.variation-head span{display:block;color:var(--muted);font-size:.71rem;margin-top:2px}.variation-bulk{margin:10px 0 12px;padding:12px;border:1px solid var(--line);border-radius:11px;background:#fff}.variation-bulk label{display:block;margin-bottom:6px}.variation-bulk textarea{min-height:125px;background:var(--surface2)}.variation-bulk-help{color:var(--muted);font-size:.7rem;line-height:1.45;margin:6px 0 10px}.variation-bulk-actions{display:flex;gap:8px;flex-wrap:wrap}.variation-list{display:grid;gap:10px}.variation-card{border:1px solid var(--line);border-radius:12px;background:#fff;padding:12px}.variation-card-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:10px}.variation-card-head strong{font-size:.82rem}.variation-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.variation-grid .wide{grid-column:1/-1}.variation-remove{min-height:32px;padding:0 10px;border:1px solid #f0caca;border-radius:9px;background:#fff;color:var(--danger);font-weight:700}.variation-empty{padding:12px;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:.76rem;text-align:center}.groupbadge{display:inline-flex;padding:4px 7px;border-radius:999px;background:#fff8dc;color:#7a5a00;font-size:.67rem;font-weight:800;margin-top:4px}
 @media(max-width:1080px){.grid{grid-template-columns:1fr}.conn{min-width:0}.pagehead{display:block}.conn{margin-top:16px}}@media(max-width:700px){.shell{width:min(100% - 18px,1450px)}.badge{display:none}.right .btn:first-child{display:none}.formgrid{grid-template-columns:1fr}.full{grid-column:auto}.tools{grid-template-columns:1fr 1fr}.search{grid-column:1/-1}}
 </style>
 </head>
@@ -62,7 +62,7 @@ linear-gradient(180deg,#fbfcfd,var(--bg))}
 <div class="field"><label>Preço anterior</label><input id="precoAntigo" inputmode="decimal"></div>
 <div class="field full">
   <div class="switchrow">
-    <div class="switchcopy"><strong>Controlar estoque</strong><span>Desligado: vende normalmente sem limite. Ligado: estoque zero bloqueia a compra.</span></div>
+    <div class="switchcopy"><strong>Controlar estoque</strong><span>Vale para o produto inteiro e todas as variações. Desligado: vende normalmente sem limite. Ligado: cada variação usa seu estoque e estoque zero bloqueia a compra.</span></div>
     <button type="button" class="switch" id="stockControlSwitch"></button>
   </div>
 </div>
@@ -171,27 +171,13 @@ function renderVariations(){
       <div class="field"><label>Cor</label><input data-v="cor" value="${esc(v.cor)}" placeholder="Ex.: Azul"></div>
       <div class="field"><label>Preço</label><input data-v="preco" value="${esc(String(v.preco??'').replace('.',','))}" inputmode="decimal" placeholder="45,00" required></div>
       <div class="field"><label>Preço anterior</label><input data-v="preco_antigo" value="${esc(v.preco_antigo?String(v.preco_antigo).replace('.',','):'')}" inputmode="decimal"></div>
-      <div class="field wide">
-        <div class="stock-toggle-row">
-          <div><strong>Controlar estoque desta variação</strong><small>Se desligado, essa variação continua disponível mesmo com estoque 0.</small></div>
-          <button type="button" class="switch ${v.controlar_estoque?'on':''}" data-v-stock-toggle="${v.localId}"></button>
-        </div>
-      </div>
-      <div class="field"><label>Estoque</label><input data-v="estoque" type="number" min="0" value="${Number(v.estoque)||0}" ${v.controlar_estoque?'':'disabled'}></div>
+      <div class="field"><label>Estoque</label><input data-v="estoque" type="number" min="0" value="${Number(v.estoque)||0}" ${stockControl?'':'disabled'}></div>
       <div class="field"><label>SKU</label><input data-v="sku_variacao" value="${esc(v.sku_variacao)}" placeholder="QUALY900-AZUL"></div>
       <div class="field wide"><label>URL da foto da variação</label><input data-v="foto_url" type="url" value="${esc(v.foto_url)}" placeholder="https://..."></div>
     </div></div>`).join('');
   document.querySelectorAll('[data-vcard]').forEach(card=>{
     const localId=card.dataset.vcard;
     card.querySelectorAll('[data-v]').forEach(inp=>inp.addEventListener('input',()=>{const v=variations.find(x=>x.localId===localId);if(v)v[inp.dataset.v]=inp.value}));
-    const stockBtn=card.querySelector('[data-v-stock-toggle]');
-    if(stockBtn)stockBtn.onclick=()=>{
-      const v=variations.find(x=>x.localId===localId);if(!v)return;
-      v.controlar_estoque=!v.controlar_estoque;
-      stockBtn.classList.toggle('on',v.controlar_estoque);
-      const stockInput=card.querySelector('[data-v="estoque"]');
-      if(stockInput)stockInput.disabled=!v.controlar_estoque;
-    };
   });
   document.querySelectorAll('[data-remove-var]').forEach(b=>b.onclick=()=>{variations=variations.filter(v=>v.localId!==b.dataset.removeVar);renderVariations()});
 }
@@ -210,7 +196,10 @@ function editGroup(key){
   editingGroup=g;const first=g.items[0];active=g.items.some(p=>!!p.ativo);
   $('id').value=first.id||'';$('titulo').value=g.title||first.titulo||'';$('descricao').value=first.descricao||'';$('categoria').value=first.categoria||'';$('etiqueta').value=first.etiqueta||'';$('foto').value=first.foto_url||'';
   if((first.produto_pai||'').trim()){
-    $('preco').value='';$('precoAntigo').value='';$('estoque').value=0;stockControl=false;$('estoque').disabled=true;$('stockControlSwitch').classList.remove('on');
+    $('preco').value='';$('precoAntigo').value='';$('estoque').value=0;
+    stockControl=g.items.some(x=>!!x.controlar_estoque);
+    $('estoque').disabled=true;
+    $('stockControlSwitch').classList.toggle('on',stockControl);
     variations=g.items.map(makeVariation);
   }else{
     $('preco').value=String(first.preco??'').replace('.',',');$('precoAntigo').value=first.preco_antigo?String(first.preco_antigo).replace('.',','):'';$('estoque').value=first.estoque??0;stockControl=!!first.controlar_estoque;$('estoque').disabled=!stockControl;$('stockControlSwitch').classList.toggle('on',stockControl);variations=[];
@@ -250,7 +239,7 @@ async function saveProduct(){
   const oldItems=editingGroup?.items||[];const oldIds=new Set(oldItems.map(x=>String(x.id)));const keptIds=new Set();
   if(vars.length){
     for(const v of vars){
-      const produto={id:v.id||'',titulo:base.titulo+' - '+String(v.variacao).trim(),descricao:base.descricao,preco:parseMoney(v.preco),preco_antigo:parseMoney(v.preco_antigo)||null,categoria:base.categoria,foto_url:String(v.foto_url||'').trim()||base.foto_url,estoque:Math.max(0,Number(v.estoque)||0),ativo:base.ativo,etiqueta:base.etiqueta,produto_pai:base.titulo,variacao:String(v.variacao||'').trim(),cor:String(v.cor||'').trim(),sku_variacao:String(v.sku_variacao||'').trim(),controlar_estoque:!!v.controlar_estoque};
+      const produto={id:v.id||'',titulo:base.titulo+' - '+String(v.variacao).trim(),descricao:base.descricao,preco:parseMoney(v.preco),preco_antigo:parseMoney(v.preco_antigo)||null,categoria:base.categoria,foto_url:String(v.foto_url||'').trim()||base.foto_url,estoque:Math.max(0,Number(v.estoque)||0),ativo:base.ativo,etiqueta:base.etiqueta,produto_pai:base.titulo,variacao:String(v.variacao||'').trim(),cor:String(v.cor||'').trim(),sku_variacao:String(v.sku_variacao||'').trim(),controlar_estoque:stockControl};
       if(v.id&&oldIds.has(String(v.id))){await api('update',{produto});keptIds.add(String(v.id))}else{await api('create',{produto})}
     }
     for(const p of oldItems){if(!keptIds.has(String(p.id)))await api('delete',{id:p.id})}
@@ -289,7 +278,12 @@ $('deleteBtn').onclick=async()=>{
 $('addVariationBtn').onclick=()=>{variations.push(makeVariation({preco:parseMoney($('preco').value)||'',preco_antigo:parseMoney($('precoAntigo').value)||'',estoque:$('estoque').value||0,foto_url:$('foto').value.trim(),controlar_estoque:stockControl}));renderVariations()};
 $('createVariationsBtn').onclick=createVariationsFromList;
 $('clearVariationBulkBtn').onclick=()=>{$('variationBulk').value='';$('variationBulk').focus()};
-$('stockControlSwitch').onclick=()=>{stockControl=!stockControl;$('stockControlSwitch').classList.toggle('on',stockControl);$('estoque').disabled=!stockControl};
+$('stockControlSwitch').onclick=()=>{
+  stockControl=!stockControl;
+  $('stockControlSwitch').classList.toggle('on',stockControl);
+  $('estoque').disabled=!stockControl;
+  document.querySelectorAll('[data-v="estoque"]').forEach(inp=>inp.disabled=!stockControl);
+};
 $('activeSwitch').onclick=()=>{active=!active;$('activeSwitch').classList.toggle('on',active)};
 $('reloadBtn').onclick=loadProducts;
 $('clearBtn').onclick=resetForm;
