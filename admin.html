@@ -62,7 +62,7 @@ linear-gradient(180deg,#fbfcfd,var(--bg))}
 <div class="field"><label>Preço anterior</label><input id="precoAntigo" inputmode="decimal"></div>
 <div class="field full">
   <div class="switchrow">
-    <div class="switchcopy"><strong>Controlar estoque</strong><span>Vale para o produto inteiro e todas as variações. Desligado: vende normalmente sem limite. Ligado: cada variação usa seu estoque e estoque zero bloqueia a compra.</span></div>
+    <div class="switchcopy"><strong>Venda livre</strong><span>ATIVADO: vende normalmente e não mostra estoque. DESATIVADO: usa o estoque informado; se estiver 0, não vende.</span></div>
     <button type="button" class="switch" id="stockControlSwitch"></button>
   </div>
 </div>
@@ -171,7 +171,7 @@ function renderVariations(){
       <div class="field"><label>Cor</label><input data-v="cor" value="${esc(v.cor)}" placeholder="Ex.: Azul"></div>
       <div class="field"><label>Preço</label><input data-v="preco" value="${esc(String(v.preco??'').replace('.',','))}" inputmode="decimal" placeholder="45,00" required></div>
       <div class="field"><label>Preço anterior</label><input data-v="preco_antigo" value="${esc(v.preco_antigo?String(v.preco_antigo).replace('.',','):'')}" inputmode="decimal"></div>
-      <div class="field"><label>Estoque</label><input data-v="estoque" type="number" min="0" value="${Number(v.estoque)||0}" ${stockControl?'':'disabled'}></div>
+      <div class="field"><label>Estoque</label><input data-v="estoque" type="number" min="0" value="${Number(v.estoque)||0}" ${stockControl?'disabled':''}></div>
       <div class="field"><label>SKU</label><input data-v="sku_variacao" value="${esc(v.sku_variacao)}" placeholder="QUALY900-AZUL"></div>
       <div class="field wide"><label>URL da foto da variação</label><input data-v="foto_url" type="url" value="${esc(v.foto_url)}" placeholder="https://..."></div>
     </div></div>`).join('');
@@ -190,7 +190,7 @@ function groupProducts(list=products){
   });
   return groups;
 }
-function resetForm(){editingGroup=null;active=true;stockControl=false;variations=[];$('form').reset();$('estoque').value=0;$('estoque').disabled=true;$('id').value='';if($('variationBulk'))$('variationBulk').value='';$('activeSwitch').classList.add('on');$('stockControlSwitch').classList.remove('on');$('formTitle').textContent='Novo produto';$('formSub').textContent='Cadastre um produto simples ou com variações';$('saveBtn').textContent='Salvar produto';$('deleteBtn').style.display='none';renderVariations()}
+function resetForm(){editingGroup=null;active=true;stockControl=true;variations=[];$('form').reset();$('estoque').value=0;$('estoque').disabled=true;$('id').value='';if($('variationBulk'))$('variationBulk').value='';$('activeSwitch').classList.add('on');$('stockControlSwitch').classList.add('on');$('formTitle').textContent='Novo produto';$('formSub').textContent='Cadastre um produto simples ou com variações';$('saveBtn').textContent='Salvar produto';$('deleteBtn').style.display='none';renderVariations()}
 function editGroup(key){
   const g=groupProducts().find(x=>x.key===key);if(!g)return;
   editingGroup=g;const first=g.items[0];active=g.items.some(p=>!!p.ativo);
@@ -198,11 +198,11 @@ function editGroup(key){
   if((first.produto_pai||'').trim()){
     $('preco').value='';$('precoAntigo').value='';$('estoque').value=0;
     stockControl=g.items.some(x=>!!x.controlar_estoque);
-    $('estoque').disabled=true;
+    $('estoque').disabled=stockControl;
     $('stockControlSwitch').classList.toggle('on',stockControl);
     variations=g.items.map(makeVariation);
   }else{
-    $('preco').value=String(first.preco??'').replace('.',',');$('precoAntigo').value=first.preco_antigo?String(first.preco_antigo).replace('.',','):'';$('estoque').value=first.estoque??0;stockControl=!!first.controlar_estoque;$('estoque').disabled=!stockControl;$('stockControlSwitch').classList.toggle('on',stockControl);variations=[];
+    $('preco').value=String(first.preco??'').replace('.',',');$('precoAntigo').value=first.preco_antigo?String(first.preco_antigo).replace('.',','):'';$('estoque').value=first.estoque??0;stockControl=!!first.controlar_estoque;$('estoque').disabled=stockControl;$('stockControlSwitch').classList.toggle('on',stockControl);variations=[];
   }
   $('activeSwitch').classList.toggle('on',active);$('formTitle').textContent='Editar produto';$('formSub').textContent=(variations.length?variations.length+' variação(ões)':'Produto simples');$('saveBtn').textContent='Salvar alterações';$('deleteBtn').style.display='inline-flex';renderVariations();window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -281,8 +281,8 @@ $('clearVariationBulkBtn').onclick=()=>{$('variationBulk').value='';$('variation
 $('stockControlSwitch').onclick=()=>{
   stockControl=!stockControl;
   $('stockControlSwitch').classList.toggle('on',stockControl);
-  $('estoque').disabled=!stockControl;
-  document.querySelectorAll('[data-v="estoque"]').forEach(inp=>inp.disabled=!stockControl);
+  $('estoque').disabled=stockControl;
+  document.querySelectorAll('[data-v="estoque"]').forEach(inp=>inp.disabled=stockControl);
 };
 $('activeSwitch').onclick=()=>{active=!active;$('activeSwitch').classList.toggle('on',active)};
 $('reloadBtn').onclick=loadProducts;
