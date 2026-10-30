@@ -190,6 +190,41 @@ header{
   .content{grid-template-columns:1fr}.sidebar{display:none;position:static}.sidebar.open{display:block}
   .filter-toggle{display:block}.products{grid-template-columns:repeat(2,1fr)}
 }
+
+.variant-box{
+  margin:12px 0 4px;
+  display:grid;
+  gap:6px;
+}
+.variant-box label{
+  font-size:.74rem;
+  font-weight:800;
+  color:var(--muted);
+}
+.variant-select{
+  width:100%;
+  min-height:42px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--text);
+  padding:0 11px;
+  outline:none;
+}
+.variant-select:focus{
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 18%,transparent);
+}
+.variant-note{
+  min-height:17px;
+  font-size:.72rem;
+  color:var(--muted);
+}
+.add:disabled{
+  opacity:.48;
+  cursor:not-allowed;
+}
+
 @media(max-width:650px){
   .shell{width:min(100% - 20px,1240px)}.nav{height:66px;gap:8px}.brand span{font-size:.9rem}
   .cart-btn{padding:0 10px;font-size:.8rem}.home-hero{min-height:auto;padding:26px 0 34px}
@@ -483,6 +518,10 @@ function normalizeProduct(row, index) {
     stock: Math.max(0, parseInt(row.estoque ?? row.stock ?? 0, 10) || 0),
     active: toBool(row.ativo ?? row.active),
     tag: String(row.etiqueta ?? row.tag ?? '').trim(),
+    parent: String(row.produto_pai ?? row.parent ?? '').trim(),
+    variant: String(row.variacao ?? row.variant ?? '').trim(),
+    color: String(row.cor ?? row.color ?? '').trim(),
+    sku: String(row.sku_variacao ?? row.sku ?? '').trim(),
     icon: ''
   };
   product.icon = categoryIcon(product.category);
@@ -544,59 +583,289 @@ function showView(name, options={}){
 function loadCart(){try{return JSON.parse(localStorage.getItem('casa-amaral-cart')||'[]')}catch(e){return []}}
 function saveCart(){localStorage.setItem('casa-amaral-cart',JSON.stringify(cart));renderCartCount()}
 function renderCartCount(){document.getElementById('cartCount').textContent=cart.reduce((s,i)=>s+i.qty,0)}
-function categoryCount(c){return c==='Todos'?PRODUCTS.length:PRODUCTS.filter(p=>p.category===c).length}
+function productGroupKey(p){
+  return p.parent
+    ? 'parent:' + p.parent.toLocaleLowerCase('pt-BR')
+    : 'single:' + p.id;
+}
+
+function groupProducts(list){
+  const groups=new Map();
+
+  list.forEach(p=>{
+    const key=productGroupKey(p);
+
+    if(!groups.has(key)){
+      groups.set(key,{
+        key,
+        name:p.parent||p.name,
+        category:p.category,
+        desc:p.desc,
+        tag:p.tag,
+        icon:p.icon,
+        variants:[]
+      });
+    }
+
+    const g=groups.get(key);
+    g.variants.push(p);
+
+    if(!g.desc && p.desc)g.desc=p.desc;
+    if(!g.tag && p.tag)g.tag=p.tag;
+  });
+
+  return [...groups.values()].map(g=>{
+    g.variants.sort((a,b)=>{
+      const av=(a.variant||a.color||a.name);
+      const bv=(b.variant||b.color||b.name);
+      return av.localeCompare(bv,'pt-BR');
+    });
+
+    const first=g.variants[0];
+    g.price=Math.min(...g.variants.map(v=>v.price));
+    g.old=first.old;
+    g.image=first.image;
+    g.stock=g.variants.reduce((sum,v)=>sum+v.stock,0);
+    return g;
+  });
+}
+
+function categoryCount(c){
+  const base=c==='Todos'?PRODUCTS:PRODUCTS.filter(p=>p.category===c);
+  return groupProducts(base).length;
+}
+
 function renderFilters(){
   const box=document.getElementById('filters');
-  box.innerHTML=cats.map(c=>`<button class="filter ${c===activeCategory?'active':''}" data-cat="${c}"><span>${c}</span><small>${categoryCount(c)}</small></button>`).join('');
+  box.innerHTML=cats.map(c=>`<button class="filter ${c===activeCategory?'active':''}" data-cat="${escapeHTML(c)}"><span>${escapeHTML(c)}</span><small>${categoryCount(c)}</small></button>`).join('');
   box.querySelectorAll('.filter').forEach(b=>b.onclick=()=>{activeCategory=b.dataset.cat;renderFilters();renderProducts()});
 }
+
 function filteredProducts(){
   let data=PRODUCTS.filter(p=>activeCategory==='Todos'||p.category===activeCategory);
-  if(searchTerm){const q=searchTerm.toLocaleLowerCase('pt-BR');data=data.filter(p=>(p.name+' '+p.category+' '+p.desc).toLocaleLowerCase('pt-BR').includes(q));}
-  if(sortMode==='price-asc')data.sort((a,b)=>a.price-b.price);
-  if(sortMode==='price-desc')data.sort((a,b)=>b.price-a.price);
-  if(sortMode==='name')data.sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
-  return data;
+
+  if(searchTerm){
+    const q=searchTerm.toLocaleLowerCase('pt-BR');
+    data=data.filter(p=>(p.name+' '+p.category+' '+p.desc+' '+p.parent+' '+p.variant+' '+p.color+' '+p.sku).toLocaleLowerCase('pt-BR').includes(q));
+  }
+
+  let groups=groupProducts(data);
+
+  if(sortMode==='price-asc')groups.sort((a,b)=>a.price-b.price);
+  if(sortMode==='price-desc')groups.sort((a,b)=>b.price-a.price);
+  if(sortMode==='name')groups.sort((a,b)=>a.name.localeCompare(b.name,'pt-BR'));
+
+  return groups;
 }
+
 function productMedia(p){
   if(p.image){
     return `<div class="media"><img src="${p.image}" alt="${escapeHTML(p.name)}" loading="lazy" referrerpolicy="no-referrer" onerror="this.style.display='none';this.nextElementSibling.style.display='block'"><span class="emoji emoji-fallback" style="display:none">${p.icon}</span></div>`;
   }
   return `<div class="media"><span class="emoji">${p.icon}</span></div>`;
 }
+
+function variantLabel(v){
+  return v.variant || v.color || v.name;
+}
+
 function renderProducts(){
   const data=filteredProducts();
+
   document.getElementById('visibleCount').textContent=data.length;
   document.getElementById('resultLabel').textContent=activeCategory==='Todos'?'Todos os produtos':activeCategory;
+
   const grid=document.getElementById('productsGrid');
-  grid.innerHTML=data.map(p=>`<article class="product">${p.tag?`<span class="tag">${escapeHTML(p.tag)}</span>`:''}${productMedia(p)}<div class="cat">${escapeHTML(p.category)}</div><h3>${escapeHTML(p.name)}</h3><div class="desc">${escapeHTML(p.desc)}</div><div class="stock">${p.stock>0?`Estoque: ${p.stock}`:'Consulte disponibilidade'}</div><div class="price-row"><div><span class="old">${p.old?money(p.old):'&nbsp;'}</span><span class="price">${money(p.price)}</span></div><button class="add" data-add="${escapeHTML(p.id)}">Adicionar</button></div></article>`).join('');
+
+  grid.innerHTML=data.map((g,index)=>{
+    const hasVariants=!!g.variants.some(v=>v.parent);
+    const first=g.variants[0];
+    const singleVariant=g.variants.length===1;
+    const selected=singleVariant?first:null;
+    const displayImage=selected?.image||g.image;
+    const displayPrice=selected?.price??g.price;
+    const displayOld=selected?.old??g.old;
+    const displayStock=selected?.stock??g.stock;
+
+    const variantOptions=hasVariants
+      ? `<div class="variant-box">
+          <label>Escolha a variação</label>
+          <select class="variant-select" data-variant-select="${index}">
+            ${singleVariant?'':`<option value="">Selecione uma opção</option>`}
+            ${g.variants.map(v=>`<option value="${escapeHTML(v.id)}">${escapeHTML(variantLabel(v))}${v.stock<=0?' — sem estoque':''}</option>`).join('')}
+          </select>
+          <div class="variant-note" data-variant-note="${index}">${selected?`Selecionado: ${escapeHTML(variantLabel(selected))}`:'Selecione antes de adicionar ao carrinho.'}</div>
+        </div>`
+      : '';
+
+    return `<article class="product" data-card="${index}">
+      ${g.tag?`<span class="tag">${escapeHTML(g.tag)}</span>`:''}
+      <div data-media="${index}">${productMedia({image:displayImage,name:g.name,icon:g.icon})}</div>
+      <div class="cat">${escapeHTML(g.category)}</div>
+      <h3>${escapeHTML(g.name)}</h3>
+      <div class="desc">${escapeHTML(g.desc)}</div>
+      ${variantOptions}
+      <div class="stock" data-stock="${index}">${displayStock>0?`Estoque: ${displayStock}`:'Consulte disponibilidade'}</div>
+      <div class="price-row">
+        <div>
+          <span class="old" data-old="${index}">${displayOld?money(displayOld):'&nbsp;'}</span>
+          <span class="price" data-price="${index}">${money(displayPrice)}</span>
+        </div>
+        <button class="add" data-add-group="${index}" data-selected-id="${selected?escapeHTML(selected.id):''}" ${hasVariants&&!selected?'disabled':''}>Adicionar</button>
+      </div>
+    </article>`;
+  }).join('');
+
   document.getElementById('emptyState').style.display=data.length?'none':'block';
-  grid.querySelectorAll('[data-add]').forEach(b=>b.onclick=()=>addToCart(b.dataset.add));
+
+  grid.querySelectorAll('[data-variant-select]').forEach(select=>{
+    select.onchange=()=>{
+      const index=Number(select.dataset.variantSelect);
+      const g=data[index];
+      const v=g?.variants.find(x=>String(x.id)===String(select.value));
+      const card=grid.querySelector(`[data-card="${index}"]`);
+      if(!card)return;
+
+      const add=card.querySelector('[data-add-group]');
+      const note=card.querySelector(`[data-variant-note="${index}"]`);
+
+      if(!v){
+        add.dataset.selectedId='';
+        add.disabled=true;
+        if(note)note.textContent='Selecione antes de adicionar ao carrinho.';
+        return;
+      }
+
+      add.dataset.selectedId=v.id;
+      add.disabled=v.stock<=0;
+
+      card.querySelector(`[data-price="${index}"]`).textContent=money(v.price);
+      card.querySelector(`[data-old="${index}"]`).innerHTML=v.old?money(v.old):'&nbsp;';
+      card.querySelector(`[data-stock="${index}"]`).textContent=v.stock>0?`Estoque: ${v.stock}`:'Sem estoque';
+
+      const media=card.querySelector(`[data-media="${index}"]`);
+      if(media)media.innerHTML=productMedia({image:v.image,name:g.name,icon:v.icon});
+
+      if(note)note.textContent=v.stock>0
+        ? `Selecionado: ${variantLabel(v)}`
+        : `${variantLabel(v)} — sem estoque`;
+    };
+  });
+
+  grid.querySelectorAll('[data-add-group]').forEach(b=>{
+    b.onclick=()=>{
+      const index=Number(b.dataset.addGroup);
+      const g=data[index];
+      if(!g)return;
+
+      const id=b.dataset.selectedId || g.variants[0]?.id;
+      addToCart(id,g.name);
+    };
+  });
 }
-function addToCart(id){
-  const p=PRODUCTS.find(x=>x.id===id), item=cart.find(x=>x.id===id);
-  if(item)item.qty++; else cart.push({id:p.id,name:p.name,price:p.price,icon:p.icon,image:p.image||'',qty:1});
-  saveCart();renderCart();
+
+function addToCart(id,displayName=''){
+  const p=PRODUCTS.find(x=>String(x.id)===String(id));
+  if(!p)return;
+
+  if(p.stock<=0){
+    alert('Esta variação está sem estoque no momento.');
+    return;
+  }
+
+  const variation=variantLabel(p);
+  const cartName=displayName || p.parent || p.name;
+  const item=cart.find(x=>String(x.id)===String(p.id));
+
+  if(item){
+    if(item.qty>=p.stock){
+      alert('A quantidade no carrinho atingiu o estoque disponível.');
+      return;
+    }
+    item.qty++;
+  }else{
+    cart.push({
+      id:p.id,
+      name:cartName,
+      variation:p.parent?variation:'',
+      color:p.color||'',
+      sku:p.sku||'',
+      price:p.price,
+      icon:p.icon,
+      image:p.image||'',
+      stock:p.stock,
+      qty:1
+    });
+  }
+
+  saveCart();
+  renderCart();
+  openCart();
 }
-function changeQty(id,delta){const item=cart.find(x=>x.id===id);if(!item)return;item.qty+=delta;if(item.qty<=0)cart=cart.filter(x=>x.id!==id);saveCart();renderCart()}
-function removeItem(id){cart=cart.filter(x=>x.id!==id);saveCart();renderCart()}
+function changeQty(id,delta){
+  const item=cart.find(x=>String(x.id)===String(id));
+  if(!item)return;
+
+  if(delta>0 && item.stock && item.qty>=item.stock){
+    alert('A quantidade no carrinho atingiu o estoque disponível.');
+    return;
+  }
+
+  item.qty+=delta;
+  if(item.qty<=0)cart=cart.filter(x=>String(x.id)!==String(id));
+  saveCart();
+  renderCart();
+}
+
+function removeItem(id){
+  cart=cart.filter(x=>String(x.id)!==String(id));
+  saveCart();
+  renderCart();
+}
+
 function renderCart(){
   const list=document.getElementById('cartList');
-  if(!cart.length)list.innerHTML='<div class="cart-empty">Seu carrinho está vazio.<br><small>Adicione produtos para montar seu orçamento.</small></div>';
-  else{
-    list.innerHTML=cart.map(i=>`<div class="cart-item"><div class="cart-thumb">${i.image?`<img src="${safeImageUrl(i.image)}" alt="">`:i.icon}</div><div class="cart-info"><strong>${i.name}</strong><span>${money(i.price)} cada</span><div class="qty"><button data-minus="${i.id}">−</button><b>${i.qty}</b><button data-plus="${i.id}">+</button></div></div><button class="remove" data-remove="${i.id}">Remover</button></div>`).join('');
+
+  if(!cart.length){
+    list.innerHTML='<div class="cart-empty">Seu carrinho está vazio.<br><small>Adicione produtos para montar seu orçamento.</small></div>';
+  }else{
+    list.innerHTML=cart.map(i=>`<div class="cart-item">
+      <div class="cart-thumb">${i.image?`<img src="${safeImageUrl(i.image)}" alt="">`:i.icon}</div>
+      <div class="cart-info">
+        <strong>${escapeHTML(i.name)}</strong>
+        ${i.variation?`<span><b>Variação:</b> ${escapeHTML(i.variation)}</span>`:''}
+        ${i.color&&i.color!==i.variation?`<span><b>Cor:</b> ${escapeHTML(i.color)}</span>`:''}
+        <span>${money(i.price)} cada</span>
+        <div class="qty">
+          <button data-minus="${escapeHTML(i.id)}">−</button>
+          <b>${i.qty}</b>
+          <button data-plus="${escapeHTML(i.id)}">+</button>
+        </div>
+      </div>
+      <button class="remove" data-remove="${escapeHTML(i.id)}">Remover</button>
+    </div>`).join('');
+
     list.querySelectorAll('[data-minus]').forEach(b=>b.onclick=()=>changeQty(b.dataset.minus,-1));
     list.querySelectorAll('[data-plus]').forEach(b=>b.onclick=()=>changeQty(b.dataset.plus,1));
     list.querySelectorAll('[data-remove]').forEach(b=>b.onclick=()=>removeItem(b.dataset.remove));
   }
+
   document.getElementById('cartTotal').textContent=money(cart.reduce((s,i)=>s+i.price*i.qty,0));
-  document.getElementById('checkoutBtn').disabled=!cart.length;renderCartCount();
+  document.getElementById('checkoutBtn').disabled=!cart.length;
+  renderCartCount();
 }
 function openCart(){document.getElementById('cartDrawer').classList.add('open');document.getElementById('drawerBackdrop').classList.add('open')}
 function closeCart(){document.getElementById('cartDrawer').classList.remove('open');document.getElementById('drawerBackdrop').classList.remove('open')}
 function checkoutWhatsApp(){
   if(!cart.length)return;
-  const lines=cart.map(i=>`• ${i.qty}x ${i.name} — ${money(i.price*i.qty)}`);
+
+  const lines=cart.map(i=>{
+    const variation=i.variation?` | Variação: ${i.variation}`:'';
+    const color=i.color&&i.color!==i.variation?` | Cor: ${i.color}`:'';
+    const sku=i.sku?` | SKU: ${i.sku}`:'';
+    return `• ${i.qty}x ${i.name}${variation}${color}${sku} — ${money(i.price*i.qty)}`;
+  });
+
   const total=money(cart.reduce((s,i)=>s+i.price*i.qty,0));
   const text=`Olá! Vim pelo site da Casa Amaral e gostaria de solicitar orçamento para:\n\n${lines.join('\n')}\n\nSubtotal estimado: ${total}`;
   window.open('https://wa.me/551436522025?text='+encodeURIComponent(text),'_blank');
