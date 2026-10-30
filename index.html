@@ -523,7 +523,7 @@ function normalizeProduct(row, index) {
     category: String(row.categoria ?? row.category ?? 'Outros').trim() || 'Outros',
     image: safeImageUrl(row.foto_url ?? row.foto ?? row.image ?? row.image_url ?? ''),
     stock: Math.max(0, parseInt(row.estoque ?? row.stock ?? 0, 10) || 0),
-    trackStock: toStockControl(row.controlar_estoque ?? row.track_stock ?? row.control_stock ?? false),
+    freeSale: toStockControl(row.controlar_estoque ?? row.track_stock ?? row.control_stock ?? false),
     active: toBool(row.ativo ?? row.active),
     tag: String(row.etiqueta ?? row.tag ?? '').trim(),
     parent: String(row.produto_pai ?? row.parent ?? '').trim(),
@@ -633,8 +633,8 @@ function groupProducts(list){
     g.price=Math.min(...g.variants.map(v=>v.price));
     g.old=first.old;
     g.image=first.image;
-    g.hasUnlimited=g.variants.some(v=>!v.trackStock);
-    g.stock=g.variants.reduce((sum,v)=>sum+(v.trackStock?v.stock:0),0);
+    g.hasUnlimited=g.variants.some(v=>v.freeSale===true);
+    g.stock=g.variants.reduce((sum,v)=>sum+(v.freeSale===true?0:v.stock),0);
     return g;
   });
 }
@@ -701,7 +701,7 @@ function renderProducts(){
           <label>Escolha a variação</label>
           <select class="variant-select" data-variant-select="${index}">
             ${singleVariant?'':`<option value="">Selecione uma opção</option>`}
-            ${g.variants.map(v=>`<option value="${escapeHTML(v.id)}">${escapeHTML(variantLabel(v))}${v.trackStock&&v.stock<=0?' — sem estoque':''}</option>`).join('')}
+            ${g.variants.map(v=>`<option value="${escapeHTML(v.id)}">${escapeHTML(variantLabel(v))}${!v.freeSale&&v.stock<=0?' — sem estoque':''}</option>`).join('')}
           </select>
           <div class="variant-note" data-variant-note="${index}">${selected?`Selecionado: ${escapeHTML(variantLabel(selected))}`:'Selecione antes de adicionar ao carrinho.'}</div>
         </div>`
@@ -714,7 +714,7 @@ function renderProducts(){
       <h3>${escapeHTML(g.name)}</h3>
       <div class="desc">${escapeHTML(g.desc)}</div>
       ${variantOptions}
-      <div class="stock" data-stock="${index}">${selected ? (selected.trackStock ? (selected.stock>0?`Estoque: ${selected.stock}`:'Sem estoque') : 'Disponível') : (g.hasUnlimited?'Disponível':(displayStock>0?`Estoque: ${displayStock}`:'Consulte disponibilidade'))}</div>
+      <div class="stock" data-stock="${index}">${selected ? (selected.freeSale ? '' : (selected.stock>0?`Estoque: ${selected.stock}`:'Sem estoque')) : (g.hasUnlimited?'':(displayStock>0?`Estoque: ${displayStock}`:'Sem estoque'))}</div>
       <div class="price-row">
         <div>
           <span class="old" data-old="${index}">${displayOld?money(displayOld):'&nbsp;'}</span>
@@ -746,16 +746,16 @@ function renderProducts(){
       }
 
       add.dataset.selectedId=v.id;
-      add.disabled=(v.trackStock===true && Number(v.stock)<=0);
+      add.disabled=(v.freeSale!==true && Number(v.stock)<=0);
 
       card.querySelector(`[data-price="${index}"]`).textContent=money(v.price);
       card.querySelector(`[data-old="${index}"]`).innerHTML=v.old?money(v.old):'&nbsp;';
-      card.querySelector(`[data-stock="${index}"]`).textContent=v.trackStock ? (v.stock>0?`Estoque: ${v.stock}`:'Sem estoque') : 'Disponível';
+      card.querySelector(`[data-stock="${index}"]`).textContent=v.freeSale ? '' : (v.stock>0?`Estoque: ${v.stock}`:'Sem estoque');
 
       const media=card.querySelector(`[data-media="${index}"]`);
       if(media)media.innerHTML=productMedia({image:v.image,name:g.name,icon:v.icon});
 
-      if(note)note.textContent=(!v.trackStock || v.stock>0)
+      if(note)note.textContent=(v.freeSale || v.stock>0)
         ? `Selecionado: ${variantLabel(v)}`
         : `${variantLabel(v)} — sem estoque`;
     };
@@ -777,7 +777,7 @@ function addToCart(id,displayName=''){
   const p=PRODUCTS.find(x=>String(x.id)===String(id));
   if(!p)return;
 
-  if(p.trackStock===true && Number(p.stock)<=0){
+  if(p.freeSale!==true && Number(p.stock)<=0){
     alert('Esta variação está sem estoque no momento.');
     return;
   }
@@ -787,7 +787,7 @@ function addToCart(id,displayName=''){
   const item=cart.find(x=>String(x.id)===String(p.id));
 
   if(item){
-    if(p.trackStock===true && item.qty>=Number(p.stock)){
+    if(p.freeSale!==true && item.qty>=Number(p.stock)){
       alert('A quantidade no carrinho atingiu o estoque disponível.');
       return;
     }
@@ -803,7 +803,7 @@ function addToCart(id,displayName=''){
       icon:p.icon,
       image:p.image||'',
       stock:p.stock,
-      trackStock:p.trackStock,
+      freeSale:p.freeSale,
       qty:1
     });
   }
@@ -816,7 +816,7 @@ function changeQty(id,delta){
   const item=cart.find(x=>String(x.id)===String(id));
   if(!item)return;
 
-  if(delta>0 && item.trackStock===true && item.qty>=Number(item.stock)){
+  if(delta>0 && item.freeSale!==true && item.qty>=Number(item.stock)){
     alert('A quantidade no carrinho atingiu o estoque disponível.');
     return;
   }
